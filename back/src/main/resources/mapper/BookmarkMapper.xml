@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.BookmarkMapper">
+
+    <select id="findByUserId" resultType="java.util.HashMap">
+        SELECT b.id, b.prompt_id, b.created_at,
+               p.title, p.description, p.tags,
+               p.bookmark_count, p.like_count
+        FROM bookmarks b
+        LEFT JOIN prompts p ON p.id = b.prompt_id
+        WHERE b.user_id = #{userId}::uuid
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="countByUserAndPrompt" resultType="int">
+        SELECT COUNT(*)
+        FROM bookmarks
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </select>
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO bookmarks (id, user_id, prompt_id)
+        VALUES (gen_random_uuid(), #{userId}::uuid, #{promptId}::uuid)
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM bookmarks
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </delete>
+
+</mapper>

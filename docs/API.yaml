@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: PromptBuilder API
+  description: 프롬프트 템플릿 허브 API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: 로컬 개발
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: AUTH_001
+        message:
+          type: string
+        details:
+          type: object
+
+    PromptVariable:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum: [text, textarea, select]
+        required:
+          type: boolean
+        placeholder:
+          type: string
+        helpText:
+          type: string
+        defaultValue:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    PromptCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        bookmarkCount:
+          type: integer
+        likeCount:
+          type: integer
+        generateCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /api/public/prompts/trending:
+    get:
+      summary: 주간 인기 프롬프트
+      parameters:
+        - name: window
+          in: query
+          schema:
+            type: string
+            default: 7d
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 성공
+
+  /api/public/prompts/random:
+    get:
+      summary: 랜덤 프롬프트
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 성공
+
+  /api/public/prompts/new:
+    get:
+      summary: 신규 프롬프트
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 성공
+
+  /api/public/prompts/search:
+    get:
+      summary: 프롬프트 검색
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [trending, new, random]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 성공
+
+  /api/public/prompts/{promptId}:
+    get:
+      summary: 프롬프트 상세 조회
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 성공
+        '404':
+          description: 프롬프트 없음
+
+  /api/public/prompts/{promptId}/generate:
+    post:
+      summary: Generate 이벤트 기록 + 서버 검증
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: object
+                  additionalProperties:
+                    type: string
+                sessionId:
+                  type: string
+      responses:
+        '200':
+          description: 성공
+
+  /api/me/bookmarks:
+    get:
+      summary: 내 북마크 목록
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 성공
+
+  /api/me/bookmarks/{promptId}:
+    post:
+      summary: 북마크 추가
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 생성됨
+    delete:
+      summary: 북마크 삭제
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 삭제됨
+
+  /api/me/prompts:
+    post:
+      summary: 프롬프트 초안 생성
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: 생성됨
+
+  /api/me/prompts/{promptId}:
+    put:
+      summary: 프롬프트 메타 수정
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 수정됨
+
+  /api/me/prompts/{promptId}/versions:
+    post:
+      summary: 새 버전 생성
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 생성됨
+
+  /api/me/prompts/{promptId}/versions/{verId}:
+    put:
+      summary: 버전 내용/변수 수정
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: verId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 수정됨
+
+  /api/me/prompts/{promptId}/publish:
+    post:
+      summary: 프롬프트 발행
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+
+  /api/me/likes/{promptId}:
+    post:
+      summary: 좋아요 추가
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 생성됨
+    delete:
+      summary: 좋아요 취소
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 삭제됨
+
+  /api/admin/prompts/{promptId}/moderate:
+    post:
+      summary: 관리자 처리
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [hide, ban, restore]
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: 성공
+        '403':
+          description: 관리자 권한 필요

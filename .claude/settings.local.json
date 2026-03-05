@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /c/GitHub/PromptBuilder/scripts/*.sh)",
+      "Bash(bash scripts/secret_scan.sh)",
+      "Bash(bash scripts/pii_scan.sh)",
+      "Bash(npm install --silent)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}

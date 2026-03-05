@@ -1,0 +1,15 @@
+vercel --prod
+vercel deploy --prod
+railway up
+railway deploy
+supabase db push
+supabase link
+terraform apply
+terraform destroy
+kubectl apply
+kubectl delete
+helm install
+helm upgrade
+helm uninstall
+aws s3 sync
+aws cloudformation deploy

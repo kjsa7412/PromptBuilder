@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: promptbuilder
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/promptbuilder}
+    username: ${SPRING_DATASOURCE_USERNAME:promptbuilder}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+  mybatis:
+    mapper-locations: classpath:mapper/*.xml
+    configuration:
+      map-underscore-to-camel-case: true
+      default-fetch-size: 100
+      default-statement-timeout: 30
+
+server:
+  port: 8080
+
+jwt:
+  jwks-url: ${JWT_JWKS_URL:https://your-project.supabase.co/auth/v1/.well-known/jwks.json}
+  issuer: ${JWT_ISSUER:https://your-project.supabase.co/auth/v1}
+  audience: ${JWT_AUDIENCE:authenticated}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  rate-limit:
+    generate-daily-per-user: ${GENERATE_DAILY_LIMIT_PER_USER:50}
+    generate-hourly-anonymous: ${GENERATE_HOURLY_LIMIT_ANONYMOUS:20}

@@ -1,0 +1,48 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+.vercel/
+*.local
+
+# Java / Spring Boot
+back/target/
+back/*.jar
+back/*.war
+*.class
+*.log
+.gradle/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Generated
+generated/
+
+# Database
+*.sql.bak
+dump.sql
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.jks
+secrets/

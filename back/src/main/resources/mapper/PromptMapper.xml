@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.PromptMapper">
+
+    <!-- 주간 trending -->
+    <select id="findTrending" resultType="java.util.HashMap">
+        SELECT p.id, p.title, p.description, p.tags,
+               p.bookmark_count, p.like_count, p.generate_count,
+               p.created_at, p.updated_at,
+               COALESCE(ts.weekly_score, 0) AS weekly_score
+        FROM prompts p
+        LEFT JOIN v_trending_scores ts ON ts.prompt_id = p.id
+        WHERE p.visibility = 'public' AND p.is_deleted = false
+        ORDER BY COALESCE(ts.weekly_score, 0) DESC, p.created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 랜덤 -->
+    <select id="findRandom" resultType="java.util.HashMap">
+        SELECT id, title, description, tags,
+               bookmark_count, like_count, generate_count, created_at
+        FROM prompts
+        WHERE visibility = 'public' AND is_deleted = false
+        ORDER BY RANDOM()
+        LIMIT #{limit}
+    </select>
+
+    <!-- 신규 -->
+    <select id="findNew" resultType="java.util.HashMap">
+        SELECT id, title, description, tags,
+               bookmark_count, like_count, generate_count, created_at
+        FROM prompts
+        WHERE visibility = 'public' AND is_deleted = false
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 검색 -->
+    <select id="search" resultType="java.util.HashMap">
+        SELECT id, title, description, tags,
+               bookmark_count, like_count, generate_count, created_at
+        FROM prompts
+        WHERE visibility = 'public' AND is_deleted = false
+        <if test="q != null and q != ''">
+            AND (title ILIKE '%' || #{q} || '%')
+        </if>
+        <if test="tag != null and tag != ''">
+            AND #{tag} = ANY(tags)
+        </if>
+        <choose>
+            <when test="sort == 'new'">ORDER BY created_at DESC</when>
+            <when test="sort == 'trending'">ORDER BY bookmark_count DESC, like_count DESC</when>
+            <otherwise>ORDER BY created_at DESC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countSearch" resultType="long">
+        SELECT COUNT(*)
+        FROM prompts
+        WHERE visibility = 'public' AND is_deleted = false
+        <if test="q != null and q != ''">
+            AND (title ILIKE '%' || #{q} || '%')
+        </if>
+        <if test="tag != null and tag != ''">
+            AND #{tag} = ANY(tags)
+        </if>
+    </select>
+
+    <!-- 상세 조회 -->
+    <select id="findById" resultType="java.util.HashMap">
+        SELECT p.id, p.user_id, p.title, p.description, p.tags,
+               p.visibility, p.current_version_id,
+               p.bookmark_count, p.like_count, p.generate_count, p.view_count,
+               p.created_at, p.updated_at,
+               pv.id AS version_id, pv.template_body, pv.version_number
+        FROM prompts p
+        LEFT JOIN prompt_versions pv ON pv.id = p.current_version_id
+        WHERE p.id = #{id}::uuid
+          AND p.visibility = 'public'
+          AND p.is_deleted = false
+    </select>
+
+    <!-- 변수 조회 -->
+    <select id="findVariablesByVersionId" resultType="java.util.HashMap">
+        SELECT id, key, label, type, required, placeholder,
+               help_text, default_value, options, sort_order
+        FROM prompt_variables
+        WHERE version_id = #{versionId}::uuid
+        ORDER BY sort_order
+    </select>
+
+    <!-- 프롬프트 생성 -->
+    <insert id="insertPrompt" parameterType="map">
+        INSERT INTO prompts (id, user_id, title, description, tags, visibility)
+        VALUES (gen_random_uuid(), #{userId}::uuid, #{title}, #{description},
+                #{tags,typeHandler=org.apache.ibatis.type.ArrayTypeHandler}::text[],
+                'draft')
+    </insert>
+
+    <!-- 프롬프트 수정 -->
+    <update id="updatePrompt" parameterType="map">
+        UPDATE prompts
+        SET title = #{title},
+            description = #{description},
+            updated_at = NOW()
+        WHERE id = #{id}::uuid AND user_id = #{userId}::uuid
+    </update>
+
+    <!-- generate count 증가 -->
+    <update id="incrementGenerateCount">
+        UPDATE prompts SET generate_count = generate_count + 1
+        WHERE id = #{id}::uuid
+    </update>
+
+</mapper>

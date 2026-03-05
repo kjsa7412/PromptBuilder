@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.UsageEventMapper">
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO usage_events (id, prompt_id, version_id, user_id, session_id, event_type, ip_address)
+        VALUES (
+            gen_random_uuid(),
+            #{promptId}::uuid,
+            <if test="versionId != null">#{versionId}::uuid</if><if test="versionId == null">NULL</if>,
+            <if test="userId != null">#{userId}::uuid</if><if test="userId == null">NULL</if>,
+            #{sessionId},
+            #{eventType},
+            #{ipAddress}::inet
+        )
+    </insert>
+
+    <select id="countGenerateByUserToday" resultType="int">
+        SELECT COUNT(*)
+        FROM usage_events
+        WHERE user_id = #{userId}::uuid
+          AND event_type = 'generate'
+          AND created_at >= CURRENT_DATE
+    </select>
+
+</mapper>
