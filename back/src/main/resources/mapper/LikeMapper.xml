@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.LikeMapper">
+
+    <select id="findByUserId" resultType="java.util.HashMap">
+        SELECT l.id, l.prompt_id, l.created_at,
+               p.title, p.description, p.tags,
+               p.bookmark_count, p.like_count
+        FROM likes l
+        LEFT JOIN prompts p ON p.id = l.prompt_id
+        WHERE l.user_id = #{userId}::uuid
+        ORDER BY l.created_at DESC
+    </select>
+
+    <select id="countByUserAndPrompt" resultType="int">
+        SELECT COUNT(*)
+        FROM likes
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </select>
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO likes (id, user_id, prompt_id)
+        VALUES (gen_random_uuid(), #{userId}::uuid, #{promptId}::uuid)
+        ON CONFLICT (user_id, prompt_id) DO NOTHING
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM likes
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </delete>
+
+</mapper>

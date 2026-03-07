@@ -13,13 +13,11 @@ interface Props {
 
 export default function PromptBuilder({ promptId, templateBody, variables, onGenerate }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState(templateBody);
   const [rendered, setRendered] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
 
-  // 기본값 초기화
   useEffect(() => {
     const defaults: Record<string, string> = {};
     variables.forEach((v) => {
@@ -27,11 +25,6 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
     });
     setValues(defaults);
   }, [variables]);
-
-  // 실시간 미리보기
-  useEffect(() => {
-    setPreview(renderPrompt(templateBody, values));
-  }, [templateBody, values]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -64,8 +57,8 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
       const finalRendered = data.data?.renderedPrompt || renderPrompt(templateBody, values);
       setRendered(finalRendered);
       onGenerate?.(finalRendered);
+      window.dispatchEvent(new CustomEvent('promptGenerated', { detail: { promptId } }));
     } catch {
-      // API 실패 시 클라이언트 치환으로 폴백
       const fallback = renderPrompt(templateBody, values);
       setRendered(fallback);
       onGenerate?.(fallback);
@@ -87,16 +80,15 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
   };
 
   return (
-    <div className="space-y-6">
-      {/* 변수 폼 */}
-      {variables.length > 0 && (
+    <div className="space-y-5">
+      {variables.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-800">변수 입력</h3>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-white/80 uppercase tracking-wider">변수 입력</h3>
           {variables.map((v) => (
-            <div key={v.key} className="space-y-1">
-              <label htmlFor={`var-${v.key}`} className="block text-sm font-medium text-gray-700">
+            <div key={v.key} className="space-y-1.5">
+              <label htmlFor={`var-${v.key}`} className="block text-sm font-medium text-gray-600 dark:text-white/70">
                 {v.label || v.key}
-                {v.required && <span className="text-red-500 ml-1" aria-label="필수">*</span>}
+                {v.required && <span className="text-pink-400 ml-1" aria-label="필수">*</span>}
               </label>
 
               {v.type === 'select' && v.options ? (
@@ -104,92 +96,71 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
                   id={`var-${v.key}`}
                   value={values[v.key] || ''}
                   onChange={(e) => setValues((prev) => ({ ...prev, [v.key]: e.target.value }))}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
                   aria-describedby={v.helpText ? `help-${v.key}` : undefined}
                 >
-                  <option value="">선택하세요</option>
+                  <option value="" className="bg-white dark:bg-[#1a1a2e]">선택하세요</option>
                   {v.options.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
+                    <option key={opt} value={opt} className="bg-white dark:bg-[#1a1a2e]">{opt}</option>
                   ))}
                 </select>
-              ) : v.type === 'textarea' ? (
+              ) : (
                 <textarea
                   id={`var-${v.key}`}
                   value={values[v.key] || ''}
                   onChange={(e) => setValues((prev) => ({ ...prev, [v.key]: e.target.value }))}
-                  placeholder={v.placeholder}
-                  rows={3}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-y"
-                  aria-describedby={v.helpText ? `help-${v.key}` : undefined}
-                />
-              ) : (
-                <input
-                  id={`var-${v.key}`}
-                  type="text"
-                  value={values[v.key] || ''}
-                  onChange={(e) => setValues((prev) => ({ ...prev, [v.key]: e.target.value }))}
-                  placeholder={v.placeholder}
-                  className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder={v.placeholder || `${v.label || v.key} 입력...`}
+                  rows={4}
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all resize-y font-mono whitespace-pre-wrap"
                   aria-describedby={v.helpText ? `help-${v.key}` : undefined}
                 />
               )}
 
-              {v.helpText && (
-                <p id={`help-${v.key}`} className="text-xs text-gray-400">{v.helpText}</p>
+              {(v.helpText || v.description) && (
+                <p id={`help-${v.key}`} className="text-xs text-gray-400 dark:text-white/40">
+                  {v.helpText || v.description}
+                </p>
               )}
               {errors[v.key] && (
-                <p role="alert" className="text-xs text-red-500">{errors[v.key]}</p>
+                <p role="alert" className="text-xs text-pink-400">{errors[v.key]}</p>
               )}
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-sm text-gray-400 dark:text-white/40 text-center py-4">이 프롬프트에는 변수가 없습니다.</p>
       )}
 
-      {/* 미리보기 */}
-      <div className="space-y-2">
-        <h3 className="font-semibold text-gray-800">미리보기</h3>
-        <pre className="bg-gray-50 border rounded-md p-4 text-sm whitespace-pre-wrap text-gray-700 min-h-[100px]">
-          {preview || '(템플릿이 없습니다)'}
-        </pre>
-      </div>
-
-      {/* Generate 버튼 */}
       <button
         onClick={handleGenerate}
         disabled={!isValid || generating}
-        className="w-full py-3 px-6 bg-primary text-white font-semibold rounded-xl
-                   disabled:opacity-50 disabled:cursor-not-allowed
-                   hover:bg-indigo-700 transition-colors"
+        className="w-full py-3 px-6 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-all hover:scale-[1.01] shadow-lg shadow-violet-500/20"
         aria-disabled={!isValid}
       >
-        {generating ? '생성 중...' : 'Generate'}
+        {generating ? '생성 중...' : '프롬프트 생성하기'}
       </button>
 
-      {/* 완성 프롬프트 */}
       {rendered && (
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-800">완성된 프롬프트</h3>
-          <pre className="bg-indigo-50 border border-indigo-200 rounded-md p-4 text-sm
-                          whitespace-pre-wrap text-gray-800 min-h-[100px]">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-white/80 uppercase tracking-wider">완성된 프롬프트</h3>
+          <pre className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 text-sm whitespace-pre-wrap text-gray-700 dark:text-white/80 min-h-[100px] font-mono max-h-64 overflow-y-auto">
             {rendered}
           </pre>
           <div className="flex gap-3">
             <button
               onClick={() => handleCopy(rendered)}
-              className="flex-1 py-2 px-4 border border-primary text-primary font-medium
-                         rounded-lg hover:bg-indigo-50 transition-colors"
+              className="flex-1 py-2 px-4 border border-violet-500/30 text-violet-500 dark:text-violet-300 font-medium rounded-xl hover:bg-violet-500/10 transition-all text-sm"
             >
               {copied ? '복사됨!' : '복사'}
             </button>
             <button
               onClick={() => handleChatUI(rendered)}
-              className="flex-1 py-2 px-4 bg-secondary text-white font-medium
-                         rounded-lg hover:bg-purple-700 transition-colors"
+              className="flex-1 py-2 px-4 bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-gray-700 dark:text-white font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-white/20 transition-all text-sm"
             >
               Chat UI로 사용
             </button>
           </div>
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-gray-400 dark:text-white/30 text-center">
             Chat UI로 사용 시 클립보드에 복사됩니다. Ctrl+V 후 Enter를 누르세요.
           </p>
         </div>

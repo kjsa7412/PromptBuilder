@@ -31,7 +31,27 @@ public interface PromptMapper {
 
     void insertPrompt(Map<String, Object> params);
 
+    void insertVersion(Map<String, Object> params);
+
+    void setCurrentVersion(Map<String, Object> params);
+
+    void insertVariable(Map<String, Object> params);
+
     void updatePrompt(Map<String, Object> params);
 
     void incrementGenerateCount(@Param("id") String id);
+
+    void incrementLikeCount(Map<String, Object> params);
+
+    List<Map<String, Object>> findMyPrompts(@Param("userId") String userId);
+
+    long countPublic();
+
+    void updateBodyMarkdown(@Param("promptId") String promptId, @Param("bodyMarkdown") String bodyMarkdown);
+
+    void incrementClipCount(@Param("id") String promptId);
+
+    void decrementClipCount(@Param("id") String promptId);
+
+    Map<String, Object> findByIdForOwner(@Param("id") String id, @Param("userId") String userId);
 }

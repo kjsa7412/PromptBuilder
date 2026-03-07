@@ -1,5 +1,6 @@
 package com.promptbuilder.security;
 
+import com.promptbuilder.service.ProfileService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +17,11 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtValidator jwtValidator;
+    private final ProfileService profileService;
 
-    public JwtAuthenticationFilter(JwtValidator jwtValidator) {
+    public JwtAuthenticationFilter(JwtValidator jwtValidator, ProfileService profileService) {
         this.jwtValidator = jwtValidator;
+        this.profileService = profileService;
     }
 
     @Override
@@ -30,21 +33,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
+            Map<String, Object> claims = null;
+
+            // 1단계: JWT 검증 — 실패 시 익명으로 처리
             try {
-                Map<String, Object> claims = jwtValidator.validate(token);
+                claims = jwtValidator.validate(token);
                 String userId = (String) claims.get("sub");
                 String role = extractRole(claims);
 
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role)
-                );
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                        new UsernamePasswordAuthenticationToken(
+                                userId,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                        );
                 auth.setDetails(claims);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception e) {
-                // 유효하지 않은 토큰 — 익명으로 처리
                 SecurityContextHolder.clearContext();
+            }
+
+            // 2단계: 프로필 upsert — JWT 인증과 독립적으로 실행 (실패해도 인증 유지)
+            if (claims != null) {
+                try {
+                    profileService.upsertFromJwt(claims);
+                } catch (Exception ignored) {
+                    // 프로필 upsert 실패는 요청 처리에 영향 없음
+                }
             }
         }
 

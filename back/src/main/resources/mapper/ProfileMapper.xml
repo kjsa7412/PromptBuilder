@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.promptbuilder.mapper.ProfileMapper">
+
+    <select id="findByUserId" resultType="map">
+        SELECT id, user_id, username, display_name, avatar_url, bio, is_admin, created_at, updated_at
+        FROM profiles
+        WHERE user_id = #{userId}::uuid
+          AND is_deleted = false
+        LIMIT 1
+    </select>
+
+    <!-- 최초 로그인 시 프로필 생성, 이미 있으면 updated_at만 갱신 -->
+    <insert id="upsert">
+        INSERT INTO profiles (id, user_id, display_name, avatar_url)
+        VALUES (
+            gen_random_uuid(),
+            #{userId}::uuid,
+            #{displayName},
+            #{avatarUrl}
+        )
+        ON CONFLICT (user_id) WHERE is_deleted = false
+        DO UPDATE SET
+            display_name = COALESCE(EXCLUDED.display_name, profiles.display_name),
+            avatar_url   = COALESCE(EXCLUDED.avatar_url,   profiles.avatar_url),
+            updated_at   = NOW()
+    </insert>
+
+</mapper>

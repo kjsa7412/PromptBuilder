@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.PostPromptMapper">
+
+    <select id="findByPromptId" resultType="java.util.HashMap">
+        SELECT pp.id, pp.prompt_id, pp.title, pp.template_body,
+               pp.sort_order, pp.status, pp.created_at, pp.updated_at
+        FROM post_prompts pp
+        WHERE pp.prompt_id = #{promptId}::uuid
+        ORDER BY pp.sort_order ASC, pp.created_at ASC
+    </select>
+
+    <select id="findById" resultType="java.util.HashMap">
+        SELECT id, prompt_id, title, template_body, sort_order, status, created_at, updated_at
+        FROM post_prompts
+        WHERE id = #{id}::uuid
+    </select>
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO post_prompts (id, prompt_id, title, template_body, sort_order, status)
+        VALUES (#{id}::uuid, #{promptId}::uuid, #{title}, #{templateBody}, #{sortOrder}, #{status})
+    </insert>
+
+    <update id="update" parameterType="map">
+        UPDATE post_prompts
+        SET title = #{title},
+            template_body = #{templateBody},
+            sort_order = #{sortOrder},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}::uuid AND prompt_id = #{promptId}::uuid
+    </update>
+
+    <delete id="delete">
+        DELETE FROM post_prompts
+        WHERE id = #{id}::uuid AND prompt_id = #{promptId}::uuid
+    </delete>
+
+    <insert id="insertVariable" parameterType="map">
+        INSERT INTO post_prompt_variables (id, post_prompt_id, key, label, description, type, sort_order)
+        VALUES (gen_random_uuid(), #{postPromptId}::uuid, #{key}, #{label}, #{description}, #{type}, #{sortOrder})
+    </insert>
+
+    <delete id="deleteVariablesByPostPromptId">
+        DELETE FROM post_prompt_variables WHERE post_prompt_id = #{postPromptId}::uuid
+    </delete>
+
+    <select id="findVariablesByPostPromptId" resultType="java.util.HashMap">
+        SELECT id, key, label, description, type, sort_order
+        FROM post_prompt_variables
+        WHERE post_prompt_id = #{postPromptId}::uuid
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="countByPromptId" resultType="long">
+        SELECT COUNT(*) FROM post_prompts WHERE prompt_id = #{promptId}::uuid
+    </select>
+
+</mapper>

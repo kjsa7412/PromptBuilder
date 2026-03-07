@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.promptbuilder.mapper.ClipMapper">
+
+    <select id="findByUserId" resultType="java.util.HashMap">
+        SELECT c.id, c.prompt_id, c.created_at,
+               p.title, p.description, p.tags,
+               p.clip_count, p.like_count, p.generate_count
+        FROM clips c
+        LEFT JOIN prompts p ON p.id = c.prompt_id
+        WHERE c.user_id = #{userId}::uuid
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="countByUserAndPrompt" resultType="int">
+        SELECT COUNT(*) FROM clips
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </select>
+
+    <insert id="insert" parameterType="map">
+        INSERT INTO clips (id, user_id, prompt_id)
+        VALUES (gen_random_uuid(), #{userId}::uuid, #{promptId}::uuid)
+        ON CONFLICT DO NOTHING
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM clips
+        WHERE user_id = #{userId}::uuid AND prompt_id = #{promptId}::uuid
+    </delete>
+
+    <update id="incrementClipCount">
+        UPDATE prompts SET clip_count = clip_count + 1 WHERE id = #{id}::uuid
+    </update>
+
+    <update id="decrementClipCount">
+        UPDATE prompts SET clip_count = GREATEST(0, clip_count - 1) WHERE id = #{id}::uuid
+    </update>
+
+</mapper>

@@ -3,6 +3,7 @@ package com.promptbuilder.service;
 import com.promptbuilder.common.ApiException;
 import com.promptbuilder.mapper.PromptMapper;
 import com.promptbuilder.mapper.UsageEventMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class PromptService {
@@ -23,8 +25,81 @@ public class PromptService {
     @Autowired
     private UsageEventMapper usageEventMapper;
 
+    @Autowired
+    @Lazy
+    private PostPromptService postPromptService;
+
     @Value("${app.rate-limit.generate-daily-per-user:50}")
     private int generateDailyLimitPerUser;
+
+    public Map<String, Object> createPrompt(String userId, Map<String, Object> body) {
+        String title = (String) body.get("title");
+        String description = body.containsKey("description") ? (String) body.get("description") : null;
+        String templateBody = body.containsKey("templateBody") ? (String) body.get("templateBody") : "";
+        String visibility = body.containsKey("visibility") ? (String) body.get("visibility") : "draft";
+        String bodyMarkdown = body.containsKey("bodyMarkdown") ? (String) body.get("bodyMarkdown") : null;
+
+        String promptId = UUID.randomUUID().toString();
+        String versionId = UUID.randomUUID().toString();
+
+        // tags 파싱
+        @SuppressWarnings("unchecked")
+        List<String> tagList = body.containsKey("tags") ? (List<String>) body.get("tags") : List.of();
+        String tagsArray = null;
+        if (!tagList.isEmpty()) {
+            tagsArray = "{" + tagList.stream()
+                .map(t -> "\"" + t.replace("\"", "\\\"") + "\"")
+                .collect(Collectors.joining(",")) + "}";
+        }
+
+        // 1. prompts 생성
+        Map<String, Object> promptParams = new HashMap<>();
+        promptParams.put("id", promptId);
+        promptParams.put("userId", userId);
+        promptParams.put("title", title);
+        promptParams.put("description", description);
+        promptParams.put("tags", tagsArray);
+        promptParams.put("visibility", visibility);
+        promptParams.put("bodyMarkdown", bodyMarkdown);
+        promptMapper.insertPrompt(promptParams);
+
+        // 2. prompt_versions 생성
+        Map<String, Object> versionParams = new HashMap<>();
+        versionParams.put("id", versionId);
+        versionParams.put("promptId", promptId);
+        versionParams.put("templateBody", templateBody);
+        promptMapper.insertVersion(versionParams);
+
+        // 3. current_version_id 업데이트
+        Map<String, Object> cvParams = new HashMap<>();
+        cvParams.put("promptId", promptId);
+        cvParams.put("versionId", versionId);
+        promptMapper.setCurrentVersion(cvParams);
+
+        // 4. 변수 파싱 후 저장
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(templateBody != null ? templateBody : "");
+        Set<String> seen = new LinkedHashSet<>();
+        while (matcher.find()) seen.add(matcher.group(1));
+
+        int order = 0;
+        for (String key : seen) {
+            Map<String, Object> varParams = new HashMap<>();
+            varParams.put("promptId", promptId);
+            varParams.put("versionId", versionId);
+            varParams.put("key", key);
+            varParams.put("sortOrder", order++);
+            promptMapper.insertVariable(varParams);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", promptId);
+        result.put("versionId", versionId);
+        return result;
+    }
+
+    public List<Map<String, Object>> getMyPrompts(String userId) {
+        return promptMapper.findMyPrompts(userId);
+    }
 
     public List<Map<String, Object>> getTrending(int limit) {
         return promptMapper.findTrending(Math.min(limit, 50));
@@ -58,13 +133,20 @@ public class PromptService {
         }
 
         // 변수 목록 추가
-        String versionId = (String) prompt.get("version_id");
+        // MyBatis camelCase mapping: "version_id" alias -> "versionId" key; UUID type -> toString
+        Object versionIdObj = prompt.get("versionId");
+        if (versionIdObj == null) versionIdObj = prompt.get("version_id");
+        String versionId = versionIdObj != null ? versionIdObj.toString() : null;
         if (versionId != null) {
             List<Map<String, Object>> variables = promptMapper.findVariablesByVersionId(versionId);
             prompt.put("variables", variables);
         } else {
             prompt.put("variables", Collections.emptyList());
         }
+
+        // post_prompts 포함
+        List<Map<String, Object>> postPrompts = postPromptService.getByPromptId(promptId);
+        prompt.put("postPrompts", postPrompts);
 
         return prompt;
     }
@@ -91,8 +173,10 @@ public class PromptService {
             throw ApiException.notFound("프롬프트를 찾을 수 없습니다");
         }
 
-        String templateBody = (String) prompt.get("template_body");
-        if (templateBody == null) templateBody = "";
+        // MyBatis camelCase mapping: "template_body" -> "templateBody"
+        Object templateBodyObj = prompt.get("templateBody");
+        if (templateBodyObj == null) templateBodyObj = prompt.get("template_body");
+        String templateBody = templateBodyObj != null ? templateBodyObj.toString() : "";
 
         @SuppressWarnings("unchecked")
         Map<String, Object> values = body.containsKey("values")
@@ -100,7 +184,10 @@ public class PromptService {
                 : Collections.emptyMap();
 
         // 변수 목록 로드
-        String versionId = (String) prompt.get("version_id");
+        // MyBatis camelCase mapping: "version_id" alias -> "versionId"; UUID type -> toString
+        Object versionIdObj = prompt.get("versionId");
+        if (versionIdObj == null) versionIdObj = prompt.get("version_id");
+        String versionId = versionIdObj != null ? versionIdObj.toString() : null;
         List<Map<String, Object>> variables = versionId != null
                 ? promptMapper.findVariablesByVersionId(versionId)
                 : Collections.emptyList();
@@ -146,6 +233,12 @@ public class PromptService {
     /**
      * 템플릿의 {{key}} 를 values로 치환한다.
      */
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalPrompts", promptMapper.countPublic());
+        return stats;
+    }
+
     public String renderPrompt(String template, Map<String, Object> values) {
         if (template == null) return "";
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(template);

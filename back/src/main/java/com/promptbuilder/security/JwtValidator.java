@@ -10,14 +10,19 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
 import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.math.BigInteger;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.math.BigInteger;
 
 @Component
 public class JwtValidator {
@@ -28,32 +33,23 @@ public class JwtValidator {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    @Value("${jwt.audience}")
-    private String audience;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * JWT를 검증하고 Claims를 Map으로 반환한다.
-     * JWKS에서 공개키를 가져와 RS256 검증 수행.
-     */
     @SuppressWarnings("unchecked")
     public Map<String, Object> validate(String token) {
         try {
             PublicKey publicKey = fetchPublicKey(token);
             Claims claims = Jwts.parser()
-                    .verifyWith((java.security.interfaces.RSAPublicKey) publicKey)
+                    .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
 
-            // issuer 검증
             if (!issuer.equals(claims.getIssuer())) {
-                throw new RuntimeException("Invalid issuer");
+                throw new RuntimeException("Invalid issuer: " + claims.getIssuer());
             }
 
-            Map<String, Object> result = new HashMap<>(claims);
-            return result;
+            return new HashMap<>(claims);
         } catch (Exception e) {
             throw new RuntimeException("JWT validation failed: " + e.getMessage(), e);
         }
@@ -61,7 +57,6 @@ public class JwtValidator {
 
     @SuppressWarnings("unchecked")
     private PublicKey fetchPublicKey(String token) throws Exception {
-        // JWT 헤더에서 kid 추출
         String[] parts = token.split("\\.");
         if (parts.length < 2) throw new RuntimeException("Invalid JWT format");
 
@@ -69,7 +64,6 @@ public class JwtValidator {
         Map<String, Object> header = objectMapper.readValue(headerJson, Map.class);
         String kid = (String) header.get("kid");
 
-        // JWKS에서 공개키 가져오기
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(jwksUrl))
@@ -81,21 +75,33 @@ public class JwtValidator {
 
         for (Map<String, Object> key : keys) {
             if (kid == null || kid.equals(key.get("kid"))) {
-                return buildPublicKey(key);
+                String alg = (String) key.get("alg");
+                String kty = (String) key.get("kty");
+                if ("ES256".equals(alg) || "EC".equals(kty)) {
+                    return buildEcPublicKey(key);
+                } else {
+                    return buildRsaPublicKey(key);
+                }
             }
         }
         throw new RuntimeException("No matching key found for kid: " + kid);
     }
 
-    private PublicKey buildPublicKey(Map<String, Object> jwk) throws Exception {
-        String n = (String) jwk.get("n");
-        String e = (String) jwk.get("e");
+    private PublicKey buildEcPublicKey(Map<String, Object> jwk) throws Exception {
+        byte[] xBytes = Base64.getUrlDecoder().decode((String) jwk.get("x"));
+        byte[] yBytes = Base64.getUrlDecoder().decode((String) jwk.get("y"));
 
-        BigInteger modulus = new BigInteger(1, Base64.getUrlDecoder().decode(n));
-        BigInteger exponent = new BigInteger(1, Base64.getUrlDecoder().decode(e));
+        AlgorithmParameters params = AlgorithmParameters.getInstance("EC");
+        params.init(new ECGenParameterSpec("secp256r1"));
+        ECParameterSpec ecSpec = params.getParameterSpec(ECParameterSpec.class);
 
-        RSAPublicKeySpec spec = new RSAPublicKeySpec(modulus, exponent);
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-        return factory.generatePublic(spec);
+        ECPoint point = new ECPoint(new BigInteger(1, xBytes), new BigInteger(1, yBytes));
+        return KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(point, ecSpec));
+    }
+
+    private PublicKey buildRsaPublicKey(Map<String, Object> jwk) throws Exception {
+        BigInteger modulus  = new BigInteger(1, Base64.getUrlDecoder().decode((String) jwk.get("n")));
+        BigInteger exponent = new BigInteger(1, Base64.getUrlDecoder().decode((String) jwk.get("e")));
+        return KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(modulus, exponent));
     }
 }

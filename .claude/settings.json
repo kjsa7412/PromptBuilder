@@ -54,7 +54,28 @@
       "Bash(docker compose version)",
       "Bash(docker --version)",
       "Bash(where docker)",
-      "Bash(powershell.exe -Command \"Get-Command docker -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")"
+      "Bash(powershell.exe -Command \"Get-Command docker -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(./mvnw compile -q)",
+      "Read(//c/GitHub/PromptBuilder/**)",
+      "Bash(xargs -r taskkill //PID //F netstat -ano)",
+      "Bash(xargs -r taskkill //PID //F sleep 2 echo \"ports cleared\")",
+      "Bash(taskkill //PID 28704 //F)",
+      "Bash(xargs -r taskkill //PID //F sleep 2)",
+      "Bash(taskkill //PID 24740 //F)",
+      "Read(//c/GitHub/PromptBuilder/back/**)",
+      "Bash(ls /c/GitHub/PromptBuilder/back/.env*)",
+      "Bash(taskkill //PID 48400 //F)",
+      "Bash(taskkill //PID 56008 //F)",
+      "Bash(curl -v http://localhost:8080/api/public/prompts)",
+      "Bash(curl -s http://localhost:8080/api/public/prompts/trending)",
+      "Bash(curl -s http://localhost:8080/api/public/prompts/new)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''OK:'', d.get\\(''code'',''?''\\), ''items:'', len\\(d.get\\(''data'',[]\\)\\) if isinstance\\(d.get\\(''data'',[]\\),list\\) else ''?''\\)\")",
+      "Read(//dev/**)",
+      "Bash(xargs -r taskkill //PID //F)",
+      "Read(//c/Users/세정아이앤씨/.claude/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\세정아이앤씨\\.claude"
     ]
   }
 }

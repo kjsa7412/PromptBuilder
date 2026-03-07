@@ -5,7 +5,8 @@ export interface PromptCard {
   title: string;
   description: string;
   tags: string[];
-  bookmarkCount: number;
+  clipCount: number;
+  bookmarkCount?: number; // 하위 호환
   likeCount: number;
   generateCount: number;
   createdAt: string;
@@ -14,21 +15,35 @@ export interface PromptCard {
 
 export interface PromptVariable {
   key: string;
-  label: string;
+  label?: string;
+  description?: string;
   type: 'text' | 'textarea' | 'select';
-  required: boolean;
+  required?: boolean;
   placeholder?: string;
   helpText?: string;
   defaultValue?: string;
   options?: string[];
+  sortOrder?: number;
+}
+
+export interface PostPrompt {
+  id: string;
+  promptId: string;
+  title: string;
+  templateBody: string;
+  sortOrder: number;
+  status: 'draft' | 'in_progress' | 'complete';
+  variables: PromptVariable[];
 }
 
 export interface PromptDetail extends PromptCard {
   userId: string;
-  templateBody: string;
+  bodyMarkdown?: string;
+  templateBody?: string;
   currentVersionId?: string;
   versionId?: string;
-  variables: PromptVariable[];
+  variables?: PromptVariable[];
+  postPrompts?: PostPrompt[];
 }
 
 export interface GenerateResult {
@@ -36,16 +51,34 @@ export interface GenerateResult {
   missingRequired: string[];
 }
 
-async function fetchApi(path: string, options?: RequestInit) {
+function snakeToCamel(s: string): string {
+  return s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function convertKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(convertKeys);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [snakeToCamel(k), convertKeys(v)])
+    );
+  }
+  return obj;
+}
+
+// eslint-disable-next-line
+async function fetchApi(path: string, options?: RequestInit): Promise<any> { // noqa
   const res = await fetch(`${API_BASE}${path}`, {
+    cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
+  if (res.status === 204) return null;
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || `API error: ${res.status}`);
   }
-  return res.json();
+  const json = await res.json();
+  return convertKeys(json);
 }
 
 async function fetchApiAuth(path: string, token: string, options?: RequestInit) {
@@ -99,15 +132,53 @@ export const api = {
       body: JSON.stringify({ values, sessionId }),
     }),
 
-  // Auth APIs
+  getStats: (): Promise<{ data: { totalPrompts: number } }> =>
+    fetchApi('/api/public/stats'),
+
+  // 클립 (북마크 대체)
+  getClips: (token: string): Promise<{ data: PromptCard[] }> =>
+    fetchApiAuth('/api/me/clips', token),
+
+  addClip: (promptId: string, token: string) =>
+    fetchApiAuth(`/api/me/clips/${promptId}`, token, { method: 'POST' }),
+
+  removeClip: (promptId: string, token: string) =>
+    fetchApiAuth(`/api/me/clips/${promptId}`, token, { method: 'DELETE' }),
+
+  // 하위 호환 (북마크)
   getBookmarks: (token: string): Promise<{ data: PromptCard[] }> =>
-    fetchApiAuth('/api/me/bookmarks', token),
+    fetchApiAuth('/api/me/clips', token),
 
-  addBookmark: (promptId: string, token: string) =>
-    fetchApiAuth(`/api/me/bookmarks/${promptId}`, token, { method: 'POST' }),
+  // 좋아요
+  getLikes: (token: string): Promise<{ data: PromptCard[] }> =>
+    fetchApiAuth('/api/me/likes', token),
 
-  removeBookmark: (promptId: string, token: string) =>
-    fetchApiAuth(`/api/me/bookmarks/${promptId}`, token, { method: 'DELETE' }),
+  addLike: (promptId: string, token: string) =>
+    fetchApiAuth(`/api/me/likes/${promptId}`, token, { method: 'POST' }),
+
+  removeLike: (promptId: string, token: string) =>
+    fetchApiAuth(`/api/me/likes/${promptId}`, token, { method: 'DELETE' }),
+
+  // 세부 프롬프트
+  getPostPrompts: (promptId: string, token: string): Promise<{ data: PostPrompt[] }> =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/post-prompts`, token),
+
+  createPostPrompt: (promptId: string, data: object, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/post-prompts`, token, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updatePostPrompt: (promptId: string, id: string, data: object, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/post-prompts/${id}`, token, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deletePostPrompt: (promptId: string, id: string, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/post-prompts/${id}`, token, {
+      method: 'DELETE',
+    }),
 };
 
 // Prompt Builder 유틸

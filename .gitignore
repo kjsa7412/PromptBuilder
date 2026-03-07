@@ -46,3 +46,7 @@ dump.sql
 *.p12
 *.jks
 secrets/
+
+# Backend local env
+back/.env
+front/.env.local

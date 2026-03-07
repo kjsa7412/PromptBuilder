@@ -6,7 +6,7 @@
     <!-- 주간 trending -->
     <select id="findTrending" resultType="java.util.HashMap">
         SELECT p.id, p.title, p.description, p.tags,
-               p.bookmark_count, p.like_count, p.generate_count,
+               p.clip_count, p.like_count, p.generate_count,
                p.created_at, p.updated_at,
                COALESCE(ts.weekly_score, 0) AS weekly_score
         FROM prompts p
@@ -19,7 +19,7 @@
     <!-- 랜덤 -->
     <select id="findRandom" resultType="java.util.HashMap">
         SELECT id, title, description, tags,
-               bookmark_count, like_count, generate_count, created_at
+               clip_count, like_count, generate_count, created_at
         FROM prompts
         WHERE visibility = 'public' AND is_deleted = false
         ORDER BY RANDOM()
@@ -29,7 +29,7 @@
     <!-- 신규 -->
     <select id="findNew" resultType="java.util.HashMap">
         SELECT id, title, description, tags,
-               bookmark_count, like_count, generate_count, created_at
+               clip_count, like_count, generate_count, created_at
         FROM prompts
         WHERE visibility = 'public' AND is_deleted = false
         ORDER BY created_at DESC
@@ -39,7 +39,7 @@
     <!-- 검색 -->
     <select id="search" resultType="java.util.HashMap">
         SELECT id, title, description, tags,
-               bookmark_count, like_count, generate_count, created_at
+               clip_count, like_count, generate_count, created_at
         FROM prompts
         WHERE visibility = 'public' AND is_deleted = false
         <if test="q != null and q != ''">
@@ -50,7 +50,7 @@
         </if>
         <choose>
             <when test="sort == 'new'">ORDER BY created_at DESC</when>
-            <when test="sort == 'trending'">ORDER BY bookmark_count DESC, like_count DESC</when>
+            <when test="sort == 'trending'">ORDER BY clip_count DESC, like_count DESC</when>
             <otherwise>ORDER BY created_at DESC</otherwise>
         </choose>
         LIMIT #{size} OFFSET #{offset}
@@ -72,7 +72,7 @@
     <select id="findById" resultType="java.util.HashMap">
         SELECT p.id, p.user_id, p.title, p.description, p.tags,
                p.visibility, p.current_version_id,
-               p.bookmark_count, p.like_count, p.generate_count, p.view_count,
+               p.clip_count, p.like_count, p.generate_count, p.view_count, p.body_markdown,
                p.created_at, p.updated_at,
                pv.id AS version_id, pv.template_body, pv.version_number
         FROM prompts p
@@ -91,12 +91,43 @@
         ORDER BY sort_order
     </select>
 
+    <!-- 내 프롬프트 목록 -->
+    <select id="findMyPrompts" resultType="java.util.HashMap">
+        SELECT id, title, description, tags, visibility,
+               clip_count, like_count, generate_count, created_at, updated_at
+        FROM prompts
+        WHERE user_id = #{userId}::uuid AND is_deleted = false
+        ORDER BY created_at DESC
+    </select>
+
     <!-- 프롬프트 생성 -->
     <insert id="insertPrompt" parameterType="map">
-        INSERT INTO prompts (id, user_id, title, description, tags, visibility)
-        VALUES (gen_random_uuid(), #{userId}::uuid, #{title}, #{description},
-                #{tags,typeHandler=org.apache.ibatis.type.ArrayTypeHandler}::text[],
-                'draft')
+        INSERT INTO prompts (id, user_id, title, description, tags, visibility, body_markdown)
+        VALUES (#{id}::uuid, #{userId}::uuid, #{title}, #{description},
+                <choose>
+                    <when test="tags != null">#{tags}::text[]</when>
+                    <otherwise>NULL</otherwise>
+                </choose>,
+                #{visibility}, #{bodyMarkdown})
+    </insert>
+
+    <!-- 버전 생성 -->
+    <insert id="insertVersion" parameterType="map">
+        INSERT INTO prompt_versions (id, prompt_id, version_number, template_body)
+        VALUES (#{id}::uuid, #{promptId}::uuid, 1, #{templateBody})
+    </insert>
+
+    <!-- current_version_id 설정 -->
+    <update id="setCurrentVersion" parameterType="map">
+        UPDATE prompts SET current_version_id = #{versionId}::uuid
+        WHERE id = #{promptId}::uuid
+    </update>
+
+    <!-- 변수 저장 -->
+    <insert id="insertVariable" parameterType="map">
+        INSERT INTO prompt_variables (id, prompt_id, version_id, key, label, type, required, sort_order)
+        VALUES (gen_random_uuid(), #{promptId}::uuid, #{versionId}::uuid,
+                #{key}, #{key}, 'text', true, #{sortOrder})
     </insert>
 
     <!-- 프롬프트 수정 -->
@@ -113,5 +144,45 @@
         UPDATE prompts SET generate_count = generate_count + 1
         WHERE id = #{id}::uuid
     </update>
+
+    <!-- like count 증가/감소 -->
+    <update id="incrementLikeCount" parameterType="map">
+        UPDATE prompts SET like_count = GREATEST(0, like_count + #{delta})
+        WHERE id = #{id}::uuid
+    </update>
+
+    <!-- public 프롬프트 수 -->
+    <select id="countPublic" resultType="long">
+        SELECT COUNT(*) FROM prompts WHERE visibility = 'public' AND is_deleted = false
+    </select>
+
+    <!-- body_markdown 업데이트 -->
+    <update id="updateBodyMarkdown">
+        UPDATE prompts SET body_markdown = #{bodyMarkdown}, updated_at = NOW()
+        WHERE id = #{promptId}::uuid
+    </update>
+
+    <!-- clip count 증가/감소 -->
+    <update id="incrementClipCount">
+        UPDATE prompts SET clip_count = clip_count + 1 WHERE id = #{id}::uuid
+    </update>
+
+    <update id="decrementClipCount">
+        UPDATE prompts SET clip_count = GREATEST(0, clip_count - 1) WHERE id = #{id}::uuid
+    </update>
+
+    <!-- 소유자용 상세 조회 (visibility 무관) -->
+    <select id="findByIdForOwner" resultType="java.util.HashMap">
+        SELECT p.id, p.user_id, p.title, p.description, p.tags,
+               p.visibility, p.current_version_id,
+               p.clip_count, p.like_count, p.generate_count, p.view_count, p.body_markdown,
+               p.created_at, p.updated_at,
+               pv.id AS version_id, pv.template_body, pv.version_number
+        FROM prompts p
+        LEFT JOIN prompt_versions pv ON pv.id = p.current_version_id
+        WHERE p.id = #{id}::uuid
+          AND p.user_id = #{userId}::uuid
+          AND p.is_deleted = false
+    </select>
 
 </mapper>
