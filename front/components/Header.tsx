@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
@@ -13,6 +13,7 @@ export default function Header() {
   const [profileName, setProfileName] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +34,13 @@ export default function Header() {
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
-      if (!s) setProfileName(null);
+      if (!s) {
+        setProfileName(null);
+        // 보호 경로에서 세션이 만료/삭제된 경우 로그인 페이지로 이동
+        if (pathname?.startsWith('/me/')) {
+          router.push('/login');
+        }
+      }
     });
     return () => subscription.unsubscribe();
   }, []);

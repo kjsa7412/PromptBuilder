@@ -24,7 +24,11 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
       if (v.defaultValue) defaults[v.key] = v.defaultValue;
     });
     setValues(defaults);
-  }, [variables]);
+    // 변수 없는 프롬프트는 즉시 완성된 결과 표시
+    if (variables.length === 0 && templateBody.trim()) {
+      setRendered(templateBody);
+    }
+  }, [variables, templateBody]);
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -130,14 +134,16 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
         <p className="text-sm text-gray-400 dark:text-white/40 text-center py-4">이 프롬프트에는 변수가 없습니다.</p>
       )}
 
-      <button
-        onClick={handleGenerate}
-        disabled={!isValid || generating}
-        className="w-full py-3 px-6 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-all hover:scale-[1.01] shadow-lg shadow-violet-500/20"
-        aria-disabled={!isValid}
-      >
-        {generating ? '생성 중...' : '프롬프트 생성하기'}
-      </button>
+      {variables.length > 0 && (
+        <button
+          onClick={handleGenerate}
+          disabled={!isValid || generating}
+          className="w-full py-3 px-6 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-all hover:scale-[1.01] shadow-lg shadow-violet-500/20"
+          aria-disabled={!isValid}
+        >
+          {generating ? '생성 중...' : '프롬프트 생성하기'}
+        </button>
+      )}
 
       {rendered && (
         <div className="space-y-3">
