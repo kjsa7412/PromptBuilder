@@ -187,3 +187,43 @@
 - 입력: GET /api/me/prompts/{id}/post-prompts
 - 기대 결과: variables 배열에 한글 key 포함 (역할, 주제)
 - 실패 기준: variables 빈 배열이면 FAIL
+
+---
+
+## P05: UI/UX 리디자인 + variable_count/first_template_body 추가
+
+### TC-P05-01: trending API variable_count 반환
+- **전제조건**: 변수가 있는 공개 프롬프트 존재
+- **입력**: GET /api/public/prompts/trending?limit=3
+- **기대 결과**: 각 항목에 variable_count (int), first_template_body (string) 포함
+- **실패 기준**: 두 필드 중 하나라도 null이면 FAIL (변수 없는 프롬프트는 0 허용)
+
+### TC-P05-02: trending/new API offset 페이지네이션
+- **전제조건**: 3개 이상의 공개 프롬프트
+- **입력**: GET /api/public/prompts/trending?limit=2&offset=2
+- **기대 결과**: 200, data 배열 반환 (offset 이후 아이템)
+- **실패 기준**: 첫 요청과 동일한 아이템이 나오면 FAIL
+
+### TC-P05-03: random API variable_count 반환
+- **전제조건**: 변수가 있는 공개 프롬프트 존재
+- **입력**: GET /api/public/prompts/random?limit=3
+- **기대 결과**: 각 항목에 variable_count, first_template_body 포함
+- **실패 기준**: 두 필드 누락 시 FAIL
+
+### TC-P05-04: search API variable_count 반환
+- **전제조건**: 공개 프롬프트 존재
+- **입력**: GET /api/public/prompts/search?sort=new&page=0&size=5
+- **기대 결과**: 각 항목에 variable_count 포함, meta.total > 0
+- **실패 기준**: variable_count 누락 시 FAIL
+
+### TC-P05-05: 홈 무한 스크롤
+- **전제조건**: 12개 이상 공개 프롬프트
+- **입력**: 홈 화면에서 trending 섹션 하단 스크롤
+- **기대 결과**: 추가 프롬프트 자동 로드
+- **실패 기준**: 스크롤 후 추가 카드가 나오지 않으면 FAIL
+
+### TC-P05-06: explore 페이지 사이드바 필터
+- **전제조건**: 공개 프롬프트 복수 존재
+- **입력**: /explore 접속 → 태그 클릭 → 결과 확인
+- **기대 결과**: 선택 태그로 필터링된 결과 표시
+- **실패 기준**: 필터 적용 후 결과가 변하지 않으면 FAIL

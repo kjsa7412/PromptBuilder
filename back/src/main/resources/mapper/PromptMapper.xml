@@ -9,7 +9,13 @@
                p.clip_count, p.like_count, p.generate_count,
                p.created_at, p.updated_at,
                COALESCE(ts.weekly_score, 0) AS weekly_score,
-               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar,
+               (SELECT COUNT(*) FROM post_prompt_variables ppv
+                JOIN post_prompts pp ON pp.id = ppv.post_prompt_id
+                WHERE pp.prompt_id = p.id) AS variable_count,
+               (SELECT template_body FROM post_prompts
+                WHERE prompt_id = p.id
+                ORDER BY sort_order ASC LIMIT 1) AS first_template_body
         FROM prompts p
         LEFT JOIN v_trending_scores ts ON ts.prompt_id = p.id
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
@@ -22,7 +28,13 @@
     <select id="findRandom" resultType="java.util.HashMap">
         SELECT p.id, p.title, p.description, p.tags,
                p.clip_count, p.like_count, p.generate_count, p.created_at,
-               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar,
+               (SELECT COUNT(*) FROM post_prompt_variables ppv
+                JOIN post_prompts pp ON pp.id = ppv.post_prompt_id
+                WHERE pp.prompt_id = p.id) AS variable_count,
+               (SELECT template_body FROM post_prompts
+                WHERE prompt_id = p.id
+                ORDER BY sort_order ASC LIMIT 1) AS first_template_body
         FROM prompts p
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false
@@ -34,7 +46,13 @@
     <select id="findNew" resultType="java.util.HashMap">
         SELECT p.id, p.title, p.description, p.tags,
                p.clip_count, p.like_count, p.generate_count, p.created_at,
-               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar,
+               (SELECT COUNT(*) FROM post_prompt_variables ppv
+                JOIN post_prompts pp ON pp.id = ppv.post_prompt_id
+                WHERE pp.prompt_id = p.id) AS variable_count,
+               (SELECT template_body FROM post_prompts
+                WHERE prompt_id = p.id
+                ORDER BY sort_order ASC LIMIT 1) AS first_template_body
         FROM prompts p
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false
@@ -46,7 +64,13 @@
     <select id="search" resultType="java.util.HashMap">
         SELECT p.id, p.title, p.description, p.tags,
                p.clip_count, p.like_count, p.generate_count, p.created_at,
-               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar,
+               (SELECT COUNT(*) FROM post_prompt_variables ppv
+                JOIN post_prompts pp ON pp.id = ppv.post_prompt_id
+                WHERE pp.prompt_id = p.id) AS variable_count,
+               (SELECT template_body FROM post_prompts
+                WHERE prompt_id = p.id
+                ORDER BY sort_order ASC LIMIT 1) AS first_template_body
         FROM prompts p
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false

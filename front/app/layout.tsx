@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/Header';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
@@ -48,9 +49,10 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Header />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-gray-200 dark:border-white/5 py-8 text-center text-sm text-gray-500 dark:text-white/30">
-            <p>&copy; 2026 PromptClip. AI 프롬프트 템플릿 허브</p>
+          <footer className="hidden md:block border-t border-gray-100 dark:border-white/5 py-6 text-center text-xs text-gray-400 dark:text-white/20">
+            &copy; 2026 PromptClip · AI 프롬프트 템플릿 커뮤니티
           </footer>
+          <MobileBottomNav />
         </ThemeProvider>
       </body>
     </html>

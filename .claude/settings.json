@@ -82,7 +82,8 @@
       "Bash(pkill -f \"PromptBuilderApplication\")",
       "Bash(pkill -f \"next dev\")",
       "Bash(pkill -f \"next-server\")",
-      "Bash(pkill -f \"mvnw spring-boot:run\")"
+      "Bash(pkill -f \"mvnw spring-boot:run\")",
+      "WebFetch(domain:www.monet.design)"
     ],
     "additionalDirectories": [
       "C:\\Users\\세정아이앤씨\\.claude"

@@ -312,3 +312,52 @@ npm run build
 - 전체 19개 TC 모두 PASS
 - 백엔드 Maven 빌드 PASS
 - 프론트엔드 Next.js 빌드 PASS
+
+---
+
+## 2026-03-08 패치 P05: UI/UX 리디자인 + variable_count/first_template_body
+
+### 환경
+- 백엔드: localhost:8080 (Spring Boot 3, 재빌드 및 재시작 완료)
+- 프론트엔드: localhost:3000 (Next.js dev)
+- DB: Docker PostgreSQL (promptbuilder_db)
+
+### 테스트 결과
+
+| TC | 기능 | 결과 | HTTP | 응답 요약 |
+|---|---|---|---|---|
+| TC-P05-01 | trending variable_count 반환 | PASS | 200 | variable_count: 2, first_template_body 포함 확인 |
+| TC-P05-02 | trending offset 페이지네이션 | PASS | 200 | offset=2 이후 항목 반환, 중복 없음 |
+| TC-P05-03 | random variable_count 반환 | PASS | 200 | variable_count, first_template_body 정상 포함 |
+| TC-P05-04 | search variable_count 반환 | PASS | 200 | total: 7, variable_count 포함 |
+| TC-P05-05 | 홈 무한 스크롤 | PASS | - | IntersectionObserver 기반 자동 로드 동작 확인 |
+| TC-P05-06 | explore 사이드바 필터 | PASS | - | 태그 클릭 시 필터 적용, active chip 표시 |
+
+### curl 테스트 상세
+
+```
+# TC-P05-01
+curl 'http://localhost:8080/api/public/prompts/trending?limit=2'
+→ variable_count: 2, first_template_body: "ㅇㅇㅇㅇ\n{{한글}}" ✓
+
+# TC-P05-02
+curl 'http://localhost:8080/api/public/prompts/trending?limit=2&offset=2'
+→ offset 페이지 정상 반환 ✓
+
+# TC-P05-03
+curl 'http://localhost:8080/api/public/prompts/random?limit=2'
+→ variable_count: 2, first_template_body 포함 ✓
+
+# TC-P05-04
+curl 'http://localhost:8080/api/public/prompts/search?sort=new&page=0&size=5'
+→ total: 7, variable_count 포함 ✓
+```
+
+### TypeScript 빌드
+- `cd front && npx tsc --noEmit` → 오류 없음 ✓
+
+### 백엔드 빌드
+- `cd back && ./mvnw package -q -DskipTests` → BUILD SUCCESS ✓
+
+### 실패 항목
+없음

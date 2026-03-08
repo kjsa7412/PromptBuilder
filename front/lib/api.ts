@@ -15,6 +15,8 @@ export interface PromptCard {
   visibility?: string;
   authorName?: string;
   authorAvatar?: string;
+  variableCount?: number;
+  firstTemplateBody?: string;
 }
 
 export interface PromptVariable {
