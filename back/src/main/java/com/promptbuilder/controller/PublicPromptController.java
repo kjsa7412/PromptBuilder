@@ -19,20 +19,22 @@ public class PublicPromptController {
 
     @GetMapping("/trending")
     public ResponseEntity<Map<String, Object>> trending(
-            @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(ApiResponse.ok(promptService.getTrending(limit)));
+            @RequestParam(defaultValue = "12") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+        return ResponseEntity.ok(ApiResponse.ok(promptService.getTrending(limit, offset)));
     }
 
     @GetMapping("/random")
     public ResponseEntity<Map<String, Object>> random(
-            @RequestParam(defaultValue = "20") int limit) {
+            @RequestParam(defaultValue = "12") int limit) {
         return ResponseEntity.ok(ApiResponse.ok(promptService.getRandom(limit)));
     }
 
     @GetMapping("/new")
     public ResponseEntity<Map<String, Object>> newPrompts(
-            @RequestParam(defaultValue = "20") int limit) {
-        return ResponseEntity.ok(ApiResponse.ok(promptService.getNew(limit)));
+            @RequestParam(defaultValue = "12") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+        return ResponseEntity.ok(ApiResponse.ok(promptService.getNew(limit, offset)));
     }
 
     @GetMapping("/search")

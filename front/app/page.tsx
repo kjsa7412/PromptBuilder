@@ -9,9 +9,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
 async function getData() {
   try {
     const [trendingRes, randomRes, newRes, statsRes] = await Promise.allSettled([
-      api.getTrending(9),
-      api.getRandom(9),
-      api.getNew(9),
+      api.getTrending(12, 0),
+      api.getRandom(12),
+      api.getNew(12, 0),
       fetch(`${API_BASE}/api/public/stats`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
 

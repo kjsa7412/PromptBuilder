@@ -15,7 +15,7 @@
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false
         ORDER BY COALESCE(ts.weekly_score, 0) DESC, p.created_at DESC
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- 랜덤 -->
@@ -39,7 +39,7 @@
         LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false
         ORDER BY p.created_at DESC
-        LIMIT #{limit}
+        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- 검색 -->

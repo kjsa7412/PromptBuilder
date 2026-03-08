@@ -101,16 +101,16 @@ public class PromptService {
         return promptMapper.findMyPrompts(userId);
     }
 
-    public List<Map<String, Object>> getTrending(int limit) {
-        return promptMapper.findTrending(Math.min(limit, 50));
+    public List<Map<String, Object>> getTrending(int limit, int offset) {
+        return promptMapper.findTrending(Math.min(limit, 50), offset);
     }
 
     public List<Map<String, Object>> getRandom(int limit) {
         return promptMapper.findRandom(Math.min(limit, 50));
     }
 
-    public List<Map<String, Object>> getNew(int limit) {
-        return promptMapper.findNew(Math.min(limit, 50));
+    public List<Map<String, Object>> getNew(int limit, int offset) {
+        return promptMapper.findNew(Math.min(limit, 50), offset);
     }
 
     public Map<String, Object> search(String q, String tag, String author, String sort, int page, int size) {

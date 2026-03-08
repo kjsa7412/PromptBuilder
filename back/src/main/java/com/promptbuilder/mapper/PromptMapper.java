@@ -9,11 +9,11 @@ import java.util.Map;
 @Mapper
 public interface PromptMapper {
 
-    List<Map<String, Object>> findTrending(@Param("limit") int limit);
+    List<Map<String, Object>> findTrending(@Param("limit") int limit, @Param("offset") int offset);
 
     List<Map<String, Object>> findRandom(@Param("limit") int limit);
 
-    List<Map<String, Object>> findNew(@Param("limit") int limit);
+    List<Map<String, Object>> findNew(@Param("limit") int limit, @Param("offset") int offset);
 
     List<Map<String, Object>> search(
             @Param("q") String q,

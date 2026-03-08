@@ -98,14 +98,14 @@ async function fetchApiAuth(path: string, token: string, options?: RequestInit) 
 
 // Public APIs
 export const api = {
-  getTrending: (limit = 6): Promise<{ data: PromptCard[] }> =>
-    fetchApi(`/api/public/prompts/trending?limit=${limit}`),
+  getTrending: (limit = 12, offset = 0): Promise<{ data: PromptCard[] }> =>
+    fetchApi(`/api/public/prompts/trending?limit=${limit}&offset=${offset}`),
 
-  getRandom: (limit = 6): Promise<{ data: PromptCard[] }> =>
+  getRandom: (limit = 12): Promise<{ data: PromptCard[] }> =>
     fetchApi(`/api/public/prompts/random?limit=${limit}`),
 
-  getNew: (limit = 6): Promise<{ data: PromptCard[] }> =>
-    fetchApi(`/api/public/prompts/new?limit=${limit}`),
+  getNew: (limit = 12, offset = 0): Promise<{ data: PromptCard[] }> =>
+    fetchApi(`/api/public/prompts/new?limit=${limit}&offset=${offset}`),
 
   search: (params: {
     q?: string;
