@@ -336,17 +336,19 @@ export default function PromptEditorPage({ promptId, token }: Props) {
         setTags(p.tags || []);
         setVisibility(p.visibility === 'private' ? 'private' : 'public');
 
-        const bodyMarkdown: string = p.bodyMarkdown || '';
+        // Backend returns snake_case — support both for safety
+        const bodyMarkdown: string = p.body_markdown || p.bodyMarkdown || '';
         const postPromptsJson = postPromptsRes.ok ? await postPromptsRes.json() : { data: [] };
         const serverPrompts: Array<{
           id: string;
           title: string;
-          templateBody: string;
+          template_body?: string; templateBody?: string;
           status: 'draft' | 'in_progress' | 'complete';
           variables?: Array<{ key: string; description?: string }>;
-          sortOrder?: number;
+          sort_order?: number; sortOrder?: number;
         }> = (postPromptsJson.data || []).sort(
-          (a: { sortOrder?: number }, b: { sortOrder?: number }) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (a: any, b: any) => (a.sort_order ?? a.sortOrder ?? 0) - (b.sort_order ?? b.sortOrder ?? 0)
         );
 
         // Reconstruct blocks from bodyMarkdown using [[PROMPT:N]] markers
@@ -373,7 +375,7 @@ export default function PromptEditorPage({ promptId, token }: Props) {
                 type: 'prompt',
                 postPromptId: sp.id,
                 title: sp.title,
-                templateBody: sp.templateBody,
+                templateBody: sp.template_body || sp.templateBody || '',
                 status: sp.status,
                 variableDescriptions: varDescs,
               });

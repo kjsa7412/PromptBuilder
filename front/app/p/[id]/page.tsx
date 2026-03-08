@@ -2,8 +2,9 @@ export const dynamic = 'force-dynamic';
 
 import { api } from '@/lib/api';
 import PromptDetailClient from '@/components/PromptDetailClient';
+import PrivatePromptClient from '@/components/PrivatePromptClient';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import type { PromptDetail } from '@/lib/api';
 
 interface Props {
   params: { id: string };
@@ -44,32 +45,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PromptDetailPage({ params }: Props) {
-  let prompt;
+  let prompt: PromptDetail | null = null;
   try {
     const res = await api.getDetail(params.id);
     prompt = res.data;
   } catch {
-    notFound();
+    // public API failed — may be private or draft; let client retry with auth
   }
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'CreativeWork',
-    name: prompt.title,
-    description: prompt.description,
-    keywords: prompt.tags?.join(', '),
-    url: `https://www.promptclip.com/p/${params.id}`,
-  };
+  // Public post: render with server-fetched data (SEO friendly)
+  if (prompt) {
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: prompt.title,
+      description: prompt.description,
+      keywords: prompt.tags?.join(', '),
+      url: `https://www.promptclip.com/p/${params.id}`,
+    };
 
-  return (
-    <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <PromptDetailClient prompt={prompt} />
+    return (
+      <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <PromptDetailClient prompt={prompt} />
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Private / draft post: client component fetches with auth token
+  return <PrivatePromptClient promptId={params.id} />;
 }

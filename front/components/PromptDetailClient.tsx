@@ -145,7 +145,8 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
             return (
               <div
                 key={idx}
-                className="rounded-xl border-2 border-gray-200 dark:border-white/10 p-4 bg-gray-50 dark:bg-white/3 hover:border-violet-400/40 transition-all"
+                onClick={() => openModal(pp.id)}
+                className="rounded-xl border-2 border-gray-200 dark:border-white/10 p-4 bg-gray-50 dark:bg-white/3 hover:border-violet-400/60 hover:bg-violet-500/5 cursor-pointer transition-all"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">
@@ -163,12 +164,9 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
                       {STATUS_LABELS[pp.status as keyof typeof STATUS_LABELS] || pp.status}
                     </span>
                   )}
-                  <button
-                    onClick={() => openModal(pp.id)}
-                    className="ml-auto px-3 py-1 text-xs bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium rounded-lg hover:opacity-90 transition-all"
-                  >
-                    생성
-                  </button>
+                  <span className="ml-auto text-xs text-violet-500 dark:text-violet-400 font-medium">
+                    클릭하여 생성 →
+                  </span>
                 </div>
 
                 {pp.templateBody && (

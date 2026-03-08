@@ -45,23 +45,22 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
     if (!validate()) return;
     setGenerating(true);
     try {
-      const res = await fetch(
+      // Always render client-side with the correct templateBody for this post_prompt.
+      // Backend generate API only knows the main prompt's template, not individual post_prompts.
+      const finalRendered = renderPrompt(templateBody, values);
+      setRendered(finalRendered);
+      onGenerate?.(finalRendered);
+      window.dispatchEvent(new CustomEvent('promptGenerated', { detail: { promptId } }));
+
+      // Fire-and-forget to increment generate_count on the backend
+      fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/api/public/prompts/${promptId}/generate`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ values }),
         }
-      );
-      const data = await res.json();
-      const finalRendered = data.data?.renderedPrompt || renderPrompt(templateBody, values);
-      setRendered(finalRendered);
-      onGenerate?.(finalRendered);
-      window.dispatchEvent(new CustomEvent('promptGenerated', { detail: { promptId } }));
-    } catch {
-      const fallback = renderPrompt(templateBody, values);
-      setRendered(fallback);
-      onGenerate?.(fallback);
+      ).catch(() => {/* ignore */});
     } finally {
       setGenerating(false);
     }
