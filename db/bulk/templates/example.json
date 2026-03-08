@@ -1,0 +1,55 @@
+{
+  "title": "게시물 제목을 입력하세요",
+  "description": "게시물에 대한 간단한 설명을 입력하세요",
+  "tags": ["태그1", "태그2", "태그3"],
+  "visibility": "public",
+  "body_markdown": "## 소개\n\n이 게시물에 대한 본문 내용을 여기에 작성합니다.\n\n아래 `[[PROMPT:0]]` 마커 위치에 첫 번째 프롬프트가 삽입됩니다.\n\n[[PROMPT:0]]\n\n두 번째 프롬프트는 아래에 삽입됩니다.\n\n[[PROMPT:1]]",
+  "post_prompts": [
+    {
+      "title": "첫 번째 프롬프트 제목",
+      "template_body": "당신은 {{role}} 전문가입니다.\n\n다음 주제에 대해 {{tone}} 톤으로 작성해주세요:\n\n{{topic}}",
+      "status": "complete",
+      "sort_order": 0,
+      "variables": [
+        {
+          "key": "role",
+          "label": "역할",
+          "description": "전문가 역할을 입력하세요 (예: 마케팅, 개발, 기획)",
+          "type": "text",
+          "sort_order": 0
+        },
+        {
+          "key": "tone",
+          "label": "어조",
+          "description": "글의 톤을 선택하세요",
+          "type": "select",
+          "options": ["전문적으로", "친근하게", "간결하게"],
+          "sort_order": 1
+        },
+        {
+          "key": "topic",
+          "label": "주제",
+          "description": "작성할 주제를 입력하세요",
+          "type": "textarea",
+          "sort_order": 2
+        }
+      ]
+    },
+    {
+      "title": "두 번째 프롬프트 제목",
+      "template_body": "위 내용을 {{format}} 형식으로 요약해주세요.",
+      "status": "complete",
+      "sort_order": 1,
+      "variables": [
+        {
+          "key": "format",
+          "label": "형식",
+          "description": "요약 형식을 선택하세요",
+          "type": "select",
+          "options": ["불릿 포인트", "번호 목록", "단락"],
+          "sort_order": 0
+        }
+      ]
+    }
+  ]
+}
