@@ -81,7 +81,7 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
   };
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl mx-auto">
       {prompt.tags && prompt.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
           {prompt.tags.map((tag: string) => (
@@ -146,7 +146,7 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
               <div
                 key={idx}
                 onClick={() => openModal(pp.id)}
-                className="rounded-xl border-2 border-gray-200 dark:border-white/10 p-4 bg-gray-50 dark:bg-white/3 hover:border-violet-400/60 hover:bg-violet-500/5 cursor-pointer transition-all"
+                className="rounded-xl border-2 border-gray-200 dark:border-white/10 p-4 bg-gray-50 dark:bg-white/[0.06] hover:border-violet-400/60 hover:bg-violet-500/5 dark:hover:bg-violet-500/10 cursor-pointer transition-all"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-mono text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">

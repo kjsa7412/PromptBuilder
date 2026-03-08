@@ -12,7 +12,8 @@
         LIMIT 1
     </select>
 
-    <!-- 최초 로그인 시 프로필 생성, 이미 있으면 updated_at만 갱신 -->
+    <!-- 최초 로그인 시 프로필 생성, 이미 있으면 updated_at만 갱신
+         display_name은 사용자가 직접 변경 가능하므로 ON CONFLICT에서 덮어쓰지 않음 -->
     <insert id="upsert">
         INSERT INTO profiles (id, user_id, display_name, avatar_url)
         VALUES (
@@ -23,9 +24,8 @@
         )
         ON CONFLICT (user_id) WHERE is_deleted = false
         DO UPDATE SET
-            display_name = COALESCE(EXCLUDED.display_name, profiles.display_name),
-            avatar_url   = COALESCE(EXCLUDED.avatar_url,   profiles.avatar_url),
-            updated_at   = NOW()
+            avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+            updated_at = NOW()
     </insert>
 
     <update id="updateProfile" parameterType="map">
