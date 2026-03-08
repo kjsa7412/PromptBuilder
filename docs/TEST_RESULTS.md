@@ -1,3 +1,121 @@
+# 테스트 결과 (2026-03-08) — 패치 P04: 한글변수 / 임시저장 / visibility / slash UX
+
+## 2026-03-08 패치 P04 테스트 결과
+
+### 환경
+
+- 백엔드: localhost:8080 (Spring Boot 3 + Java 17)
+- DB: Docker PostgreSQL 16 (promptbuilder_db)
+- 인증: 로컬 ECDSA 키페어로 테스트 JWT 발급 (kid: test-key-01, user: 118149df-a070-4a7e-8e0b-a20d35d88680)
+- Supabase 직접 로그인 불가 (GitHub OAuth 계정, 비밀번호 미설정, rate limit)
+
+### 테스트 결과 표
+
+| TC | 기능 | 결과 | HTTP | 응답 요약 |
+|---|---|---|---|---|
+| TC-P04-01 | 한글 변수 포함 post-prompt 생성 | PASS | 201 | variables: [{key:"역할"}, {key:"주제"}] 정상 추출 |
+| TC-P04-02 | 임시저장 (draft) 생성 | PASS (조건부) | 400 / 201 | 빈 제목=400 (예상 동작), auto-title=201 성공 |
+| TC-P04-03 | 한글 변수 조회 | PASS | 200 | variables 2개 (역할, 주제) 확인 |
+
+### TC-P04-01 상세 결과
+
+**Step 1: 프롬프트 생성**
+```
+POST /api/me/prompts
+Request: {"title":"한글변수 테스트 2026-03-08","visibility":"public","description":"한글 변수 패치 테스트","tags":["test","한글"]}
+Response (201): {"data":{"versionId":"62e6a8bb-0039-48c0-a471-20a0f0d6b817","id":"dadefc25-f806-4508-8cd3-9bd248ce935d"}}
+```
+
+**Step 2: 한글 변수 post-prompt 생성**
+```
+POST /api/me/prompts/dadefc25-f806-4508-8cd3-9bd248ce935d/post-prompts
+Request: {"templateBody":"{{역할}}로서 {{주제}}를 설명해","orderIndex":0}
+Response (201): {
+  "data": {
+    "id": "21311606-673f-49fe-81d4-f724c3e07ea4",
+    "template_body": "{{역할}}로서 {{주제}}를 설명해",
+    "prompt_id": "dadefc25-f806-4508-8cd3-9bd248ce935d",
+    "title": "새 프롬프트",
+    "sort_order": 0,
+    "status": "draft",
+    "created_at": "2026-03-08T09:12:52.637+00:00",
+    "updated_at": "2026-03-08T09:12:52.637+00:00"
+  }
+}
+```
+참고: POST 응답에는 variables 미포함 (GET 조회 시 포함됨)
+
+### TC-P04-03 상세 결과
+
+**한글 변수 조회**
+```
+GET /api/me/prompts/dadefc25-f806-4508-8cd3-9bd248ce935d/post-prompts
+Response (200): {
+  "data": [{
+    "id": "21311606-673f-49fe-81d4-f724c3e07ea4",
+    "template_body": "{{역할}}로서 {{주제}}를 설명해",
+    "variables": [
+      {"id": "23abb0ba-48b8-47e1-b590-dec413487b86", "key": "역할", "label": "역할", "type": "text", "sort_order": 0},
+      {"id": "7b186eb3-f026-4ee2-9361-21a5ee297477", "key": "주제", "label": "주제", "type": "text", "sort_order": 1}
+    ]
+  }]
+}
+```
+PLACEHOLDER_PATTERN = `\{\{\s*([a-zA-Z0-9_가-힣]+)\s*\}\}` 정상 동작 확인
+
+### TC-P04-02 상세 결과
+
+**Step 1: 빈 제목으로 draft 저장 시도**
+```
+POST /api/me/prompts
+Request: {"title":"","visibility":"draft"}
+Response (400): {"code":"VALID_001","details":{},"message":"title은 필수입니다"}
+```
+→ 예상된 동작: 백엔드는 title 필수 validation 유지. 프론트가 auto-title 생성 후 전달하는 구조.
+
+**Step 2: auto-generated title로 draft 저장**
+```
+POST /api/me/prompts
+Request: {"title":"임시저장 3월 8일 오후 6시 12분","visibility":"draft"}
+Response (201): {"data":{"versionId":"e18ba2c3-aee7-46c7-b4da-499622b6d2fa","id":"388329da-747c-4c4f-a49c-de0edce71a12"}}
+```
+→ PASS: draft visibility 저장 정상 동작
+
+### 패치 P04 소스 코드 확인
+
+**한글 변수 패턴** (`PostPromptService.java` line 15-16):
+```java
+private static final Pattern PLACEHOLDER_PATTERN =
+        Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_가-힣]+)\\s*\\}\\}");
+```
+`가-힣` 범위 추가로 한글 변수명 인식 확인 완료.
+
+### 실패 항목
+
+없음. 모든 TC PASS.
+
+TC-P04-02는 빈 제목 시 400을 반환하나 이는 설계 의도에 따른 정상 동작 (프론트에서 auto-title 생성).
+
+### 테스트 데이터 정리
+
+| 항목 | ID |
+|---|---|
+| 테스트 프롬프트 (한글변수) | dadefc25-f806-4508-8cd3-9bd248ce935d |
+| 테스트 PostPrompt | 21311606-673f-49fe-81d4-f724c3e07ea4 |
+| 변수 역할 | 23abb0ba-48b8-47e1-b590-dec413487b86 |
+| 변수 주제 | 7b186eb3-f026-4ee2-9361-21a5ee297477 |
+| 테스트 Draft 프롬프트 | 388329da-747c-4c4f-a49c-de0edce71a12 |
+
+정리 명령 (선택적):
+```sql
+DELETE FROM prompts WHERE id IN (
+  'dadefc25-f806-4508-8cd3-9bd248ce935d',
+  '388329da-747c-4c4f-a49c-de0edce71a12'
+);
+```
+
+---
+
 # 테스트 결과 (2026-03-07) — 상세/편집/메인 전면 개편 후 QA
 
 ## 환경 (2026-03-07)

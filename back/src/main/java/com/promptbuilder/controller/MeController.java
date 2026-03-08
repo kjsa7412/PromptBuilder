@@ -4,6 +4,7 @@ import com.promptbuilder.common.ApiResponse;
 import com.promptbuilder.service.ClipService;
 import com.promptbuilder.service.PostPromptService;
 import com.promptbuilder.service.LikeService;
+import com.promptbuilder.service.ProfileService;
 import com.promptbuilder.service.PromptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class MeController {
 
     @Autowired
     private PromptService promptService;
+
+    @Autowired
+    private ProfileService profileService;
 
     private String getUserId(Authentication auth) {
         return (String) auth.getPrincipal();
@@ -125,5 +129,58 @@ public class MeController {
             @PathVariable String id, Authentication auth) {
         postPromptService.delete(promptId, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/prompts/{promptId}")
+    public ResponseEntity<Map<String, Object>> updatePrompt(
+            @PathVariable String promptId,
+            @RequestBody Map<String, Object> body, Authentication auth) {
+        String userId = getUserId(auth);
+        Map<String, Object> updated = promptService.updatePrompt(userId, promptId, body);
+        return ResponseEntity.ok(ApiResponse.ok(updated));
+    }
+
+    @DeleteMapping("/prompts/{promptId}")
+    public ResponseEntity<Void> deletePrompt(
+            @PathVariable String promptId, Authentication auth) {
+        String userId = getUserId(auth);
+        promptService.deletePrompt(userId, promptId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/prompts/{promptId}/visibility")
+    public ResponseEntity<Map<String, Object>> updateVisibility(
+            @PathVariable String promptId,
+            @RequestBody Map<String, Object> body, Authentication auth) {
+        String userId = getUserId(auth);
+        String visibility = (String) body.get("visibility");
+        if (visibility == null) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("VALID_001", "visibility는 필수입니다"));
+        }
+        Map<String, Object> result = promptService.updateVisibility(userId, promptId, visibility);
+        return ResponseEntity.ok(ApiResponse.ok(result));
+    }
+
+    @GetMapping("/prompts/{promptId}/detail")
+    public ResponseEntity<Map<String, Object>> getMyPromptDetail(
+            @PathVariable String promptId, Authentication auth) {
+        String userId = getUserId(auth);
+        Map<String, Object> prompt = promptService.getDetailForOwner(promptId, userId);
+        return ResponseEntity.ok(ApiResponse.ok(prompt));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, Object>> getProfile(Authentication auth) {
+        String userId = getUserId(auth);
+        Map<String, Object> profile = profileService.getProfile(userId);
+        return ResponseEntity.ok(ApiResponse.ok(profile));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @RequestBody Map<String, Object> body, Authentication auth) {
+        String userId = getUserId(auth);
+        Map<String, Object> profile = profileService.updateProfile(userId, body);
+        return ResponseEntity.ok(ApiResponse.ok(profile));
     }
 }

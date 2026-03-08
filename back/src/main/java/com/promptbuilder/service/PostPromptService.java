@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class PostPromptService {
 
     private static final Pattern PLACEHOLDER_PATTERN =
-            Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_]+)\\s*\\}\\}");
+            Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_가-힣]+)\\s*\\}\\}");
 
     @Autowired
     private PostPromptMapper postPromptMapper;

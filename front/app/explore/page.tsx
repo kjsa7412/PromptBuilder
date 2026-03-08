@@ -15,13 +15,14 @@ function ExploreContent() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(searchParams.get('q') || '');
   const [tag, setTag] = useState(searchParams.get('tag') || '');
+  const [author, setAuthor] = useState(searchParams.get('author') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || 'new');
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await api.search({ q, tag, sort });
+        const res = await api.search({ q, tag, author, sort });
         setPrompts(res.data || []);
         setTotal(res.meta?.total || 0);
       } catch {
@@ -31,7 +32,7 @@ function ExploreContent() {
       }
     };
     load();
-  }, [q, tag, sort]);
+  }, [q, tag, author, sort]);
 
   return (
     <div className="space-y-8">
@@ -54,7 +55,14 @@ function ExploreContent() {
           value={tag}
           onChange={(e) => setTag(e.target.value)}
           placeholder="태그 필터..."
-          className="w-40 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+          className="w-36 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
+        />
+        <input
+          type="text"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          placeholder="작성자 검색..."
+          className="w-36 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
         />
         <select
           value={sort}

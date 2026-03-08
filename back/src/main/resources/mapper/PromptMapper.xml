@@ -8,9 +8,11 @@
         SELECT p.id, p.title, p.description, p.tags,
                p.clip_count, p.like_count, p.generate_count,
                p.created_at, p.updated_at,
-               COALESCE(ts.weekly_score, 0) AS weekly_score
+               COALESCE(ts.weekly_score, 0) AS weekly_score,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
         FROM prompts p
         LEFT JOIN v_trending_scores ts ON ts.prompt_id = p.id
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.visibility = 'public' AND p.is_deleted = false
         ORDER BY COALESCE(ts.weekly_score, 0) DESC, p.created_at DESC
         LIMIT #{limit}
@@ -18,53 +20,68 @@
 
     <!-- 랜덤 -->
     <select id="findRandom" resultType="java.util.HashMap">
-        SELECT id, title, description, tags,
-               clip_count, like_count, generate_count, created_at
-        FROM prompts
-        WHERE visibility = 'public' AND is_deleted = false
+        SELECT p.id, p.title, p.description, p.tags,
+               p.clip_count, p.like_count, p.generate_count, p.created_at,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+        FROM prompts p
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
+        WHERE p.visibility = 'public' AND p.is_deleted = false
         ORDER BY RANDOM()
         LIMIT #{limit}
     </select>
 
     <!-- 신규 -->
     <select id="findNew" resultType="java.util.HashMap">
-        SELECT id, title, description, tags,
-               clip_count, like_count, generate_count, created_at
-        FROM prompts
-        WHERE visibility = 'public' AND is_deleted = false
-        ORDER BY created_at DESC
+        SELECT p.id, p.title, p.description, p.tags,
+               p.clip_count, p.like_count, p.generate_count, p.created_at,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+        FROM prompts p
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
+        WHERE p.visibility = 'public' AND p.is_deleted = false
+        ORDER BY p.created_at DESC
         LIMIT #{limit}
     </select>
 
     <!-- 검색 -->
     <select id="search" resultType="java.util.HashMap">
-        SELECT id, title, description, tags,
-               clip_count, like_count, generate_count, created_at
-        FROM prompts
-        WHERE visibility = 'public' AND is_deleted = false
+        SELECT p.id, p.title, p.description, p.tags,
+               p.clip_count, p.like_count, p.generate_count, p.created_at,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
+        FROM prompts p
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
+        WHERE p.visibility = 'public' AND p.is_deleted = false
         <if test="q != null and q != ''">
-            AND (title ILIKE '%' || #{q} || '%')
+            AND (p.title ILIKE '%' || #{q} || '%')
         </if>
         <if test="tag != null and tag != ''">
-            AND #{tag} = ANY(tags)
+            AND #{tag} = ANY(p.tags)
+        </if>
+        <if test="author != null and author != ''">
+            AND (pr.display_name ILIKE '%' || #{author} || '%'
+              OR pr.username ILIKE '%' || #{author} || '%')
         </if>
         <choose>
-            <when test="sort == 'new'">ORDER BY created_at DESC</when>
-            <when test="sort == 'trending'">ORDER BY clip_count DESC, like_count DESC</when>
-            <otherwise>ORDER BY created_at DESC</otherwise>
+            <when test="sort == 'new'">ORDER BY p.created_at DESC</when>
+            <when test="sort == 'trending'">ORDER BY p.clip_count DESC, p.like_count DESC</when>
+            <otherwise>ORDER BY p.created_at DESC</otherwise>
         </choose>
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select id="countSearch" resultType="long">
         SELECT COUNT(*)
-        FROM prompts
-        WHERE visibility = 'public' AND is_deleted = false
+        FROM prompts p
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
+        WHERE p.visibility = 'public' AND p.is_deleted = false
         <if test="q != null and q != ''">
-            AND (title ILIKE '%' || #{q} || '%')
+            AND (p.title ILIKE '%' || #{q} || '%')
         </if>
         <if test="tag != null and tag != ''">
-            AND #{tag} = ANY(tags)
+            AND #{tag} = ANY(p.tags)
+        </if>
+        <if test="author != null and author != ''">
+            AND (pr.display_name ILIKE '%' || #{author} || '%'
+              OR pr.username ILIKE '%' || #{author} || '%')
         </if>
     </select>
 
@@ -74,9 +91,11 @@
                p.visibility, p.current_version_id,
                p.clip_count, p.like_count, p.generate_count, p.view_count, p.body_markdown,
                p.created_at, p.updated_at,
-               pv.id AS version_id, pv.template_body, pv.version_number
+               pv.id AS version_id, pv.template_body, pv.version_number,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
         FROM prompts p
         LEFT JOIN prompt_versions pv ON pv.id = p.current_version_id
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.id = #{id}::uuid
           AND p.visibility = 'public'
           AND p.is_deleted = false
@@ -177,12 +196,47 @@
                p.visibility, p.current_version_id,
                p.clip_count, p.like_count, p.generate_count, p.view_count, p.body_markdown,
                p.created_at, p.updated_at,
-               pv.id AS version_id, pv.template_body, pv.version_number
+               pv.id AS version_id, pv.template_body, pv.version_number,
+               pr.display_name AS author_name, pr.avatar_url AS author_avatar
         FROM prompts p
         LEFT JOIN prompt_versions pv ON pv.id = p.current_version_id
+        LEFT JOIN profiles pr ON pr.user_id = p.user_id AND pr.is_deleted = false
         WHERE p.id = #{id}::uuid
           AND p.user_id = #{userId}::uuid
           AND p.is_deleted = false
+    </select>
+
+    <!-- 프롬프트 전체 수정 (소유자) -->
+    <update id="updatePromptFull" parameterType="map">
+        UPDATE prompts
+        SET title = #{title},
+            description = #{description},
+            tags = <choose><when test="tags != null">#{tags}::text[]</when><otherwise>NULL</otherwise></choose>,
+            body_markdown = #{bodyMarkdown},
+            visibility = #{visibility},
+            updated_at = NOW()
+        WHERE id = #{id}::uuid AND user_id = #{userId}::uuid AND is_deleted = false
+    </update>
+
+    <!-- 소프트 삭제 -->
+    <update id="softDeletePrompt" parameterType="map">
+        UPDATE prompts SET is_deleted = true, updated_at = NOW()
+        WHERE id = #{id}::uuid AND user_id = #{userId}::uuid
+    </update>
+
+    <!-- 공개 여부 변경 -->
+    <update id="updateVisibility" parameterType="map">
+        UPDATE prompts SET visibility = #{visibility}, updated_at = NOW()
+        WHERE id = #{id}::uuid AND user_id = #{userId}::uuid AND is_deleted = false
+    </update>
+
+    <!-- 임시저장 목록 (draft) -->
+    <select id="findMyDraftPrompts" resultType="java.util.HashMap">
+        SELECT id, title, description, tags, visibility,
+               clip_count, like_count, generate_count, created_at, updated_at
+        FROM prompts
+        WHERE user_id = #{userId}::uuid AND visibility = 'draft' AND is_deleted = false
+        ORDER BY updated_at DESC
     </select>
 
 </mapper>

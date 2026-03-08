@@ -2,6 +2,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
 
 export interface PromptCard {
   id: string;
+  promptId?: string; // For clips: the actual prompt ID (id is the clip record ID)
   title: string;
   description: string;
   tags: string[];
@@ -11,6 +12,9 @@ export interface PromptCard {
   generateCount: number;
   createdAt: string;
   weeklyScore?: number;
+  visibility?: string;
+  authorName?: string;
+  authorAvatar?: string;
 }
 
 export interface PromptVariable {
@@ -106,6 +110,7 @@ export const api = {
   search: (params: {
     q?: string;
     tag?: string;
+    author?: string;
     sort?: string;
     page?: number;
     size?: number;
@@ -113,6 +118,7 @@ export const api = {
     const query = new URLSearchParams();
     if (params.q) query.set('q', params.q);
     if (params.tag) query.set('tag', params.tag);
+    if (params.author) query.set('author', params.author);
     if (params.sort) query.set('sort', params.sort);
     query.set('page', String(params.page ?? 0));
     query.set('size', String(params.size ?? 20));
@@ -179,10 +185,42 @@ export const api = {
     fetchApiAuth(`/api/me/prompts/${promptId}/post-prompts/${id}`, token, {
       method: 'DELETE',
     }),
+
+  // 프롬프트 수정
+  updatePrompt: (promptId: string, data: object, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}`, token, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // 프롬프트 삭제
+  deletePrompt: (promptId: string, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}`, token, { method: 'DELETE' }),
+
+  // 공개여부 변경
+  updateVisibility: (promptId: string, visibility: string, token: string) =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/visibility`, token, {
+      method: 'PATCH',
+      body: JSON.stringify({ visibility }),
+    }),
+
+  // 소유자 상세 조회 (draft 포함)
+  getMyPromptDetail: (promptId: string, token: string): Promise<{ data: PromptDetail }> =>
+    fetchApiAuth(`/api/me/prompts/${promptId}/detail`, token),
+
+  // 프로필
+  getProfile: (token: string) =>
+    fetchApiAuth('/api/me/profile', token),
+
+  updateProfile: (data: { displayName?: string; username?: string; avatarUrl?: string }, token: string) =>
+    fetchApiAuth('/api/me/profile', token, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 };
 
 // Prompt Builder 유틸
-const PLACEHOLDER_RE = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
+const PLACEHOLDER_RE = /\{\{\s*([a-zA-Z0-9_가-힣]+)\s*\}\}/g;
 
 export function extractVariableKeys(template: string): string[] {
   const keys = new Set<string>();

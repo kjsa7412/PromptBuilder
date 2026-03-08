@@ -4,8 +4,37 @@ import Header from '@/components/Header';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'PromptClip - AI 프롬프트 허브',
-  description: '최고의 AI 프롬프트를 만들고 공유하세요. 변수 템플릿으로 완성도 높은 프롬프트를 쉽게 생성하세요.',
+  metadataBase: new URL('https://www.promptclip.com'),
+  title: {
+    default: 'PromptClip - AI 프롬프트 허브',
+    template: '%s | PromptClip',
+  },
+  description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티. ChatGPT, Claude 등 AI를 위한 최고의 프롬프트를 찾아보세요.',
+  keywords: ['AI 프롬프트', 'ChatGPT 프롬프트', 'Claude 프롬프트', '프롬프트 템플릿', 'AI 활용'],
+  authors: [{ name: 'PromptClip' }],
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://www.promptclip.com',
+    siteName: 'PromptClip',
+    title: 'PromptClip - AI 프롬프트 허브',
+    description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'PromptClip' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PromptClip - AI 프롬프트 허브',
+    description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+  },
+  alternates: {
+    canonical: 'https://www.promptclip.com',
+  },
 };
 
 export default function RootLayout({

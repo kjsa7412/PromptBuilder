@@ -67,4 +67,20 @@ class PromptServiceTest {
         String result = promptService.renderPrompt(template, Map.of());
         assertEquals(template, result);
     }
+
+    @Test
+    void renderPrompt_shouldSupportKoreanVariables() {
+        String template = "{{이름}}님, {{역할}}로서 작업해주세요.";
+        Map<String, Object> values = Map.of("이름", "홍길동", "역할", "개발자");
+        String result = promptService.renderPrompt(template, values);
+        assertEquals("홍길동님, 개발자로서 작업해주세요.", result);
+    }
+
+    @Test
+    void renderPrompt_shouldHandleMixedKoreanEnglishVariables() {
+        String template = "{{name}}의 {{역할}}은 {{role}}입니다.";
+        Map<String, Object> values = Map.of("name", "Alice", "역할", "역할", "role", "developer");
+        String result = promptService.renderPrompt(template, values);
+        assertEquals("Alice의 역할은 developer입니다.", result);
+    }
 }

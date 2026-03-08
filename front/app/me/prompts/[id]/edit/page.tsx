@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import PromptEditorPage from '@/components/PromptEditorPage';
 
-export default function NewPromptPage() {
+export default function EditPromptPage() {
   const router = useRouter();
+  const params = useParams();
+  const promptId = params.id as string;
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,5 +26,5 @@ export default function NewPromptPage() {
     );
   }
 
-  return <PromptEditorPage token={token} />;
+  return <PromptEditorPage token={token} promptId={promptId} />;
 }

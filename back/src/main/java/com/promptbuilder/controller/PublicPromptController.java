@@ -39,10 +39,11 @@ public class PublicPromptController {
     public ResponseEntity<Map<String, Object>> search(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String author,
             @RequestParam(defaultValue = "new") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Map<String, Object> result = promptService.search(q, tag, sort, page, size);
+        Map<String, Object> result = promptService.search(q, tag, author, sort, page, size);
         Map<String, Object> meta = ApiResponse.meta(
                 (long) result.get("total"), page, size);
         return ResponseEntity.ok(ApiResponse.ok(result.get("items"), meta));

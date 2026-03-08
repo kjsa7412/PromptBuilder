@@ -165,3 +165,25 @@
 - **조건**: API snake_case 응답을 프론트에서 camelCase로 변환
 - **기대결과**: HTTP 200, 페이지에 templateBody/bodyMarkdown/likeCount 등 올바르게 렌더링
 - **방법**: curl HTTP 상태코드 검증 (렌더링 오류 시 500 반환)
+
+---
+
+## [2026-03-08] 패치: 한글변수 / 임시저장 / visibility / slash UX
+
+### TC-P04-01: 한글 변수 포함 프롬프트 블록 생성
+- 전제조건: 인증된 유저, 프롬프트 존재
+- 입력: POST /api/me/prompts/{id}/post-prompts body={templateBody: "{{역할}}로서 {{주제}}를 설명해"}
+- 기대 결과: 200, variables 배열에 key="역할", key="주제" 포함
+- 실패 기준: variables 빈 배열이면 FAIL
+
+### TC-P04-02: 제목 없는 임시저장 (draft)
+- 전제조건: 인증된 유저
+- 입력: POST /api/me/prompts body={visibility:"draft", title:"임시저장 테스트 날짜"}
+- 기대 결과: 201, data.id 존재
+- 실패 기준: 400/500이면 FAIL
+
+### TC-P04-03: 한글 변수 조회 확인
+- 전제조건: TC-P04-01 성공 후
+- 입력: GET /api/me/prompts/{id}/post-prompts
+- 기대 결과: variables 배열에 한글 key 포함 (역할, 주제)
+- 실패 기준: variables 빈 배열이면 FAIL

@@ -11,4 +11,6 @@ public interface ProfileMapper {
     Map<String, Object> findByUserId(@Param("userId") String userId);
 
     void upsert(Map<String, Object> params);
+
+    void updateProfile(Map<String, Object> params);
 }

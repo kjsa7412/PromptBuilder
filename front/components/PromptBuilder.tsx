@@ -143,7 +143,7 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
       {rendered && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-500 dark:text-white/80 uppercase tracking-wider">완성된 프롬프트</h3>
-          <pre className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 text-sm whitespace-pre-wrap text-gray-700 dark:text-white/80 min-h-[100px] font-mono max-h-64 overflow-y-auto">
+          <pre className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 text-sm whitespace-pre-wrap text-gray-700 dark:text-white/80 min-h-[100px] font-mono max-h-96 overflow-y-auto touch-pan-y">
             {rendered}
           </pre>
           <div className="flex gap-3">

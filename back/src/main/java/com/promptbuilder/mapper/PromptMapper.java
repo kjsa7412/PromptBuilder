@@ -18,12 +18,13 @@ public interface PromptMapper {
     List<Map<String, Object>> search(
             @Param("q") String q,
             @Param("tag") String tag,
+            @Param("author") String author,
             @Param("sort") String sort,
             @Param("offset") int offset,
             @Param("size") int size
     );
 
-    long countSearch(@Param("q") String q, @Param("tag") String tag);
+    long countSearch(@Param("q") String q, @Param("tag") String tag, @Param("author") String author);
 
     Map<String, Object> findById(@Param("id") String id);
 
@@ -53,5 +54,13 @@ public interface PromptMapper {
 
     void decrementClipCount(@Param("id") String promptId);
 
-    Map<String, Object> findByIdForOwner(@Param("id") String id, @Param("userId") String userId);
+    Map<String, Object> findByIdForOwner(Map<String, Object> params);
+
+    void updatePromptFull(Map<String, Object> params);
+
+    void softDeletePrompt(Map<String, Object> params);
+
+    void updateVisibility(Map<String, Object> params);
+
+    List<Map<String, Object>> findMyDraftPrompts(@Param("userId") String userId);
 }

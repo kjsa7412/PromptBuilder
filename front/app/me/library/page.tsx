@@ -1,21 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import PromptCard from '@/components/PromptCard';
 import { api } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import type { PromptCard as PromptCardType } from '@/lib/api';
 
-type Tab = 'my' | 'clips';
+type Tab = 'my' | 'clips' | 'drafts';
 
 export default function LibraryPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>('my');
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'my');
   const [myPrompts, setMyPrompts] = useState<PromptCardType[]>([]);
   const [clips, setClips] = useState<PromptCardType[]>([]);
+  const [drafts, setDrafts] = useState<PromptCardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -26,18 +29,21 @@ export default function LibraryPage() {
       }
       const t = data.session.access_token;
       try {
-        const [myRes, clipRes] = await Promise.all([
+        const [myAllRes, clipRes] = await Promise.all([
           fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/api/me/prompts`,
             { headers: { Authorization: `Bearer ${t}` } }
           ).then((r) => r.json()),
           api.getClips(t),
         ]);
-        setMyPrompts(myRes.data || []);
+        const allMyPrompts = myAllRes.data || [];
+        setMyPrompts(allMyPrompts.filter((p: PromptCardType & { visibility?: string }) => p.visibility !== 'draft'));
+        setDrafts(allMyPrompts.filter((p: PromptCardType & { visibility?: string }) => p.visibility === 'draft'));
         setClips(clipRes.data || []);
       } catch {
         setMyPrompts([]);
         setClips([]);
+        setDrafts([]);
       } finally {
         setLoading(false);
       }
@@ -45,7 +51,26 @@ export default function LibraryPage() {
     load();
   }, [router]);
 
-  const items = tab === 'my' ? myPrompts : clips;
+  const handleDelete = async (promptId: string) => {
+    if (!confirm('이 프롬프트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    try {
+      setDeletingId(promptId);
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/api/me/prompts/${promptId}`,
+        { method: 'DELETE', headers: { Authorization: `Bearer ${data.session.access_token}` } }
+      );
+      setMyPrompts(prev => prev.filter(p => p.id !== promptId));
+      setDrafts(prev => prev.filter(p => p.id !== promptId));
+    } catch {
+      alert('삭제에 실패했습니다.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const items = tab === 'my' ? myPrompts : tab === 'clips' ? clips : drafts;
 
   return (
     <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
@@ -89,6 +114,16 @@ export default function LibraryPage() {
           >
             클립 {!loading && <span className="ml-1 text-xs opacity-60">({clips.length})</span>}
           </button>
+          <button
+            onClick={() => setTab('drafts')}
+            className={`px-5 py-2 text-sm font-medium rounded-lg transition-all ${
+              tab === 'drafts'
+                ? 'bg-violet-600/40 text-violet-600 dark:text-violet-200 border border-violet-500/30'
+                : 'text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            임시저장 {!loading && <span className="ml-1 text-xs opacity-60">({drafts.length})</span>}
+          </button>
         </div>
 
         {loading ? (
@@ -101,7 +136,7 @@ export default function LibraryPage() {
           <div className="text-center py-24 rounded-2xl border border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/2">
             {tab === 'my' ? (
               <>
-                <p className="text-5xl mb-4">&#9997;</p>
+                <p className="text-5xl mb-4">✏️</p>
                 <p className="text-gray-500 dark:text-white/60 font-medium mb-2">아직 작성한 프롬프트가 없습니다</p>
                 <p className="text-gray-400 dark:text-white/30 text-sm mb-6">첫 번째 프롬프트를 만들어보세요</p>
                 <Link
@@ -111,9 +146,9 @@ export default function LibraryPage() {
                   새 프롬프트 작성하기
                 </Link>
               </>
-            ) : (
+            ) : tab === 'clips' ? (
               <>
-                <p className="text-5xl mb-4">&#9733;</p>
+                <p className="text-5xl mb-4">⭐</p>
                 <p className="text-gray-500 dark:text-white/60 font-medium mb-2">아직 클립한 프롬프트가 없습니다</p>
                 <p className="text-gray-400 dark:text-white/30 text-sm mb-6">마음에 드는 프롬프트를 클립해보세요</p>
                 <Link
@@ -123,12 +158,81 @@ export default function LibraryPage() {
                   프롬프트 탐색하기
                 </Link>
               </>
+            ) : (
+              <>
+                <p className="text-5xl mb-4">📝</p>
+                <p className="text-gray-500 dark:text-white/60 font-medium mb-2">임시저장된 프롬프트가 없습니다</p>
+                <p className="text-gray-400 dark:text-white/30 text-sm mb-6">작성 중인 프롬프트를 임시저장해보세요</p>
+              </>
             )}
+          </div>
+        ) : tab === 'my' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {items.map((p) => (
+              <div key={p.id} className="relative group">
+                <PromptCard prompt={p} hrefOverride={undefined} />
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                  <Link
+                    href={`/me/prompts/${p.id}/edit`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/20 text-gray-600 dark:text-white/70 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all shadow-sm"
+                  >
+                    수정
+                  </Link>
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(p.id); }}
+                    disabled={deletingId === p.id}
+                    className="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-red-200 dark:border-red-500/30 text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {deletingId === p.id ? '...' : '삭제'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : tab === 'drafts' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {items.map((p) => (
+              <div key={p.id} className="relative group">
+                <Link href={`/me/prompts/${p.id}/edit`} className="block h-full">
+                  <div className="p-6 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/8 hover:border-violet-300 dark:hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10 cursor-pointer h-full flex flex-col gap-3">
+                    {p.tags && p.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="px-2 py-0.5 text-xs rounded-full bg-violet-500/20 text-violet-600 dark:text-violet-300 border border-violet-500/30">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors flex-1">
+                      {p.title || '제목 없음'}
+                    </h3>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 w-fit">
+                      임시저장
+                    </span>
+                  </div>
+                </Link>
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(p.id); }}
+                    disabled={deletingId === p.id}
+                    className="px-2 py-1 text-xs bg-white dark:bg-gray-800 border border-red-200 dark:border-red-500/30 text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {deletingId === p.id ? '...' : '삭제'}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {items.map((p) => (
-              <PromptCard key={p.id} prompt={p} />
+              <PromptCard
+                key={p.id}
+                prompt={p}
+                hrefOverride={(p as PromptCardType & { promptId?: string }).promptId || undefined}
+              />
             ))}
           </div>
         )}

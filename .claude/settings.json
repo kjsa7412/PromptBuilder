@@ -72,7 +72,17 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(''OK:'', d.get\\(''code'',''?''\\), ''items:'', len\\(d.get\\(''data'',[]\\)\\) if isinstance\\(d.get\\(''data'',[]\\),list\\) else ''?''\\)\")",
       "Read(//dev/**)",
       "Bash(xargs -r taskkill //PID //F)",
-      "Read(//c/Users/세정아이앤씨/.claude/**)"
+      "Read(//c/Users/세정아이앤씨/.claude/**)",
+      "Bash(podman --version)",
+      "Bash(podman machine list)",
+      "Bash(SPRING_DATASOURCE_URL=\"jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?sslmode=require\" SPRING_DATASOURCE_USERNAME=\"postgres.etrjyirxrjquuidytxhp\" SPRING_DATASOURCE_PASSWORD=\"An44mFybigZyuFwU\" JWT_JWKS_URL=\"https://etrjyirxrjquuidytxhp.supabase.co/auth/v1/.well-known/jwks.json\" JWT_ISSUER=\"https://etrjyirxrjquuidytxhp.supabase.co/auth/v1\" JWT_AUDIENCE=\"authenticated\" CORS_ALLOWED_ORIGINS=\"https://prompt-builder-tawny.vercel.app,http://localhost:3000\" ./mvnw spring-boot:run)",
+      "Bash(chmod +x /Users/kjsa/Documents/GitHub/PromptBuilder/scripts/run-back-local.sh)",
+      "Bash(npm install)",
+      "Bash(npm run dev)",
+      "Bash(pkill -f \"PromptBuilderApplication\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(pkill -f \"mvnw spring-boot:run\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\세정아이앤씨\\.claude"

@@ -28,4 +28,13 @@
             updated_at   = NOW()
     </insert>
 
+    <update id="updateProfile" parameterType="map">
+        UPDATE profiles
+        SET username = #{username},
+            display_name = #{displayName},
+            avatar_url = #{avatarUrl},
+            updated_at = NOW()
+        WHERE user_id = #{userId}::uuid AND is_deleted = false
+    </update>
+
 </mapper>

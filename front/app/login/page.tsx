@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,20 +22,6 @@ export default function LoginPage() {
       setError(err.message);
     } else {
       router.push('/');
-    }
-    setLoading(false);
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const { error: err } = await supabase.auth.signUp({ email, password });
-    if (err) {
-      setError(err.message);
-    } else {
-      setMessage('확인 이메일을 발송했습니다. 이메일을 확인하세요.');
     }
     setLoading(false);
   };
@@ -66,12 +51,6 @@ export default function LoginPage() {
           {error && (
             <div role="alert" className="text-sm text-pink-600 dark:text-pink-300 bg-pink-50 dark:bg-pink-500/10 border border-pink-200 dark:border-pink-500/20 rounded-xl p-3 mb-4">
               {error}
-            </div>
-          )}
-
-          {message && (
-            <div className="text-sm text-green-600 dark:text-green-300 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl p-3 mb-4">
-              {message}
             </div>
           )}
 
@@ -106,28 +85,23 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-xl disabled:opacity-40 hover:opacity-90 transition-all"
+                className="w-full py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-xl disabled:opacity-40 hover:opacity-90 transition-all"
               >
                 {loading ? '처리 중...' : '로그인'}
-              </button>
-              <button
-                type="button"
-                onClick={handleSignUp}
-                disabled={loading}
-                className="flex-1 py-3 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-white/70 font-medium rounded-xl disabled:opacity-40 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
-              >
-                회원가입
               </button>
             </div>
           </form>
         </div>
 
-        <p className="text-center mt-6 text-sm text-gray-300 dark:text-white/20">
-          <Link href="/" className="hover:text-gray-500 dark:hover:text-white/50 transition-colors">홈으로 돌아가기</Link>
+        <p className="text-center mt-4 text-sm text-gray-500 dark:text-white/40">
+          계정이 없으신가요?{' '}
+          <Link href="/signup" className="text-violet-500 hover:text-violet-400 font-medium transition-colors">
+            회원가입
+          </Link>
         </p>
       </div>
     </div>

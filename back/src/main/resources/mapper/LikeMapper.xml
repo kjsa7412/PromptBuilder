@@ -6,7 +6,7 @@
     <select id="findByUserId" resultType="java.util.HashMap">
         SELECT l.id, l.prompt_id, l.created_at,
                p.title, p.description, p.tags,
-               p.bookmark_count, p.like_count
+               p.clip_count, p.like_count
         FROM likes l
         LEFT JOIN prompts p ON p.id = l.prompt_id
         WHERE l.user_id = #{userId}::uuid

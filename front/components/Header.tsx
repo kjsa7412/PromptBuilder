@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { supabase } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
@@ -9,13 +10,30 @@ import type { Session } from '@supabase/supabase-js';
 export default function Header() {
   const [session, setSession] = useState<Session | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [profileName, setProfileName] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      const s = data.session;
+      if (s?.access_token) {
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}/api/me/profile`, {
+          headers: { Authorization: `Bearer ${s.access_token}` }
+        }).then(r => r.ok ? r.json() : null)
+          .then(json => {
+            if (json?.data) {
+              const name = json.data.display_name || json.data.displayName || json.data.username;
+              if (name) setProfileName(name);
+            }
+          }).catch(() => {});
+      }
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
+      if (!s) setProfileName(null);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -38,6 +56,7 @@ export default function Header() {
             <>
               <Link href="/me/library" className="text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors">내 라이브러리</Link>
               <Link href="/me/prompts/new" className="text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors">새 프롬프트</Link>
+              <Link href="/me/profile" className="text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition-colors">프로필</Link>
             </>
           )}
 
@@ -62,9 +81,13 @@ export default function Header() {
           )}
 
           {session ? (
-            <button onClick={() => supabase.auth.signOut()}
+            <button onClick={async () => {
+              await supabase.auth.signOut();
+              router.push('/');
+              router.refresh();
+            }}
               className="px-4 py-1.5 text-sm bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-gray-700 dark:text-white/80 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition-all">
-              로그아웃
+              {profileName ? `${profileName} · 로그아웃` : '로그아웃'}
             </button>
           ) : (
             <Link href="/login"

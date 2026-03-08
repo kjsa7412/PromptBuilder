@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class PromptService {
 
     private static final Pattern PLACEHOLDER_PATTERN =
-            Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_]+)\\s*\\}\\}");
+            Pattern.compile("\\{\\{\\s*([a-zA-Z0-9_가-힣]+)\\s*\\}\\}");
 
     @Autowired
     private PromptMapper promptMapper;
@@ -113,10 +113,10 @@ public class PromptService {
         return promptMapper.findNew(Math.min(limit, 50));
     }
 
-    public Map<String, Object> search(String q, String tag, String sort, int page, int size) {
+    public Map<String, Object> search(String q, String tag, String author, String sort, int page, int size) {
         int offset = page * size;
-        List<Map<String, Object>> items = promptMapper.search(q, tag, sort, offset, size);
-        long total = promptMapper.countSearch(q, tag);
+        List<Map<String, Object>> items = promptMapper.search(q, tag, author, sort, offset, size);
+        long total = promptMapper.countSearch(q, tag, author);
 
         Map<String, Object> result = new HashMap<>();
         result.put("items", items);
@@ -228,6 +228,84 @@ public class PromptService {
         result.put("renderedPrompt", rendered);
         result.put("missingRequired", missingRequired);
         return result;
+    }
+
+    public Map<String, Object> updatePrompt(String userId, String promptId, Map<String, Object> body) {
+        String title = (String) body.getOrDefault("title", "");
+        if (title.isBlank()) throw new IllegalArgumentException("title은 필수입니다");
+
+        String description = (String) body.get("description");
+        String visibility = (String) body.getOrDefault("visibility", "draft");
+        String bodyMarkdown = (String) body.get("bodyMarkdown");
+
+        @SuppressWarnings("unchecked")
+        List<String> tagList = body.containsKey("tags") ? (List<String>) body.get("tags") : List.of();
+        String tagsArray = null;
+        if (!tagList.isEmpty()) {
+            tagsArray = "{" + tagList.stream()
+                .map(t -> "\"" + t.replace("\"", "\\\"") + "\"")
+                .collect(Collectors.joining(",")) + "}";
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", promptId);
+        params.put("userId", userId);
+        params.put("title", title);
+        params.put("description", description);
+        params.put("tags", tagsArray);
+        params.put("bodyMarkdown", bodyMarkdown);
+        params.put("visibility", visibility);
+        promptMapper.updatePromptFull(params);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", promptId);
+        return result;
+    }
+
+    public void deletePrompt(String userId, String promptId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", promptId);
+        params.put("userId", userId);
+        promptMapper.softDeletePrompt(params);
+    }
+
+    public Map<String, Object> updateVisibility(String userId, String promptId, String visibility) {
+        if (!List.of("public", "private", "draft").contains(visibility)) {
+            throw new IllegalArgumentException("유효하지 않은 visibility 값입니다");
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", promptId);
+        params.put("userId", userId);
+        params.put("visibility", visibility);
+        promptMapper.updateVisibility(params);
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", promptId);
+        result.put("visibility", visibility);
+        return result;
+    }
+
+    public Map<String, Object> getDetailForOwner(String promptId, String userId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", promptId);
+        params.put("userId", userId);
+        Map<String, Object> prompt = promptMapper.findByIdForOwner(params);
+        if (prompt == null) {
+            throw ApiException.notFound("프롬프트를 찾을 수 없습니다");
+        }
+
+        Object versionIdObj = prompt.get("versionId");
+        if (versionIdObj == null) versionIdObj = prompt.get("version_id");
+        String versionId = versionIdObj != null ? versionIdObj.toString() : null;
+        if (versionId != null) {
+            List<Map<String, Object>> variables = promptMapper.findVariablesByVersionId(versionId);
+            prompt.put("variables", variables);
+        } else {
+            prompt.put("variables", Collections.emptyList());
+        }
+
+        List<Map<String, Object>> postPrompts = postPromptService.getByPromptId(promptId);
+        prompt.put("postPrompts", postPrompts);
+        return prompt;
     }
 
     /**

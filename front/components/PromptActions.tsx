@@ -135,7 +135,9 @@ export default function PromptActions({
         }`}
         title={token ? (clipped ? '클립 해제' : '클립') : '로그인 필요'}
       >
-        <span>&#128279;</span>
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill={clipped ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
         <span>클립 {clipCount}</span>
       </button>
 
@@ -149,12 +151,16 @@ export default function PromptActions({
         }`}
         title={token ? (liked ? '좋아요 취소' : '좋아요') : '로그인 필요'}
       >
-        <span>{liked ? '&#9829;' : '&#9825;'}</span>
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
         <span>좋아요 {likeCount}</span>
       </button>
 
       <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 bg-gray-100 dark:bg-white/5 text-sm text-gray-400 dark:text-white/40">
-        <span>&#9889;</span>
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
         <span>사용 {generateCount}</span>
       </div>
     </div>
