@@ -1,0 +1,469 @@
+[
+  {
+    "title": "업무 이메일·메신저 답장 작성 프롬프트",
+    "description": "업무 요청 회신, 일정 조율, 자료 전달, 정중한 거절 등 일상적인 직장 커뮤니케이션 문안을 빠르게 작성하는 범용 프롬프트입니다.",
+    "tags": ["업무", "이메일", "메신저", "답장", "커뮤니케이션"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n일반 업무에서 가장 자주 반복되는 일 중 하나는 이메일과 메신저 답장 작성입니다. 이 게시물은 상황에 맞는 회신 문안을 빠르게 만드는 데 초점을 둡니다.\n\n먼저 상황에 맞는 초안을 만들고,\n\n[[PROMPT:0]]\n\n필요하면 같은 내용을 더 짧게, 더 정중하게, 더 부드럽게 다듬을 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "상황 맞춤 업무 답장 초안 작성",
+        "template_body": "당신은 업무 커뮤니케이션 도우미입니다.\n\n아래 정보를 바탕으로 바로 보낼 수 있는 답장 초안을 작성해주세요.\n\n[상대방]\n{{recipient_type}}\n\n[받은 내용 또는 상황]\n{{situation}}\n\n[내가 전달할 핵심]\n{{key_message}}\n\n[원하는 톤]\n{{tone}}\n\n[추가 조건]\n{{extra_condition}}\n\n조건:\n- 실제 회사에서 바로 사용할 수 있는 자연스러운 한국어로 작성할 것\n- 지나치게 길지 않게 작성할 것\n- 제목이 필요한 경우 제목도 함께 제안할 것\n- 초안 3개 버전으로 제시할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "recipient_type",
+            "label": "상대방",
+            "description": "상사, 동료, 타부서, 외부업체, 고객 등 상대를 선택하세요",
+            "type": "select",
+            "options": ["상사", "동료", "타부서", "외부업체", "고객", "기타"],
+            "sort_order": 0
+          },
+          {
+            "key": "situation",
+            "label": "상황",
+            "description": "받은 요청, 문의, 일정 조율 상황 등을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "key_message",
+            "label": "전달 핵심",
+            "description": "승인, 거절, 전달, 확인, 요청 등 꼭 말해야 할 핵심을 입력하세요",
+            "type": "textarea",
+            "sort_order": 2
+          },
+          {
+            "key": "tone",
+            "label": "문체",
+            "description": "원하는 말투를 선택하세요",
+            "type": "select",
+            "options": ["정중하게", "간결하게", "부드럽게", "공식적으로"],
+            "sort_order": 3
+          },
+          {
+            "key": "extra_condition",
+            "label": "추가 조건",
+            "description": "오늘 중 회신, 첨부파일 언급, 기한 포함 등 추가 조건을 입력하세요",
+            "type": "textarea",
+            "sort_order": 4
+          }
+        ]
+      },
+      {
+        "title": "기존 문안 톤과 길이 다듬기",
+        "template_body": "아래 문안을 {{revision_goal}} 방향으로 수정해주세요.\n\n[원문]\n{{original_text}}\n\n조건:\n- 의미는 유지할 것\n- 더 자연스럽고 실무적으로 다듬을 것\n- 수정본 3개를 제시할 것\n- 각 수정본의 차이를 짧게 설명할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "revision_goal",
+            "label": "수정 방향",
+            "description": "어떤 방향으로 다듬을지 선택하세요",
+            "type": "select",
+            "options": ["더 짧게", "더 정중하게", "더 부드럽게", "더 명확하게"],
+            "sort_order": 0
+          },
+          {
+            "key": "original_text",
+            "label": "원문",
+            "description": "수정할 이메일 또는 메신저 문안을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "회의 메모를 회의록으로 정리하는 프롬프트",
+    "description": "정리되지 않은 회의 메모, 녹취 요약, 메신저 대화를 공식적인 회의록과 후속조치 목록으로 정리하는 범용 업무 프롬프트입니다.",
+    "tags": ["업무", "회의록", "회의정리", "액션아이템", "문서작성"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n회의가 끝난 직후의 메모는 대부분 정리되지 않은 상태입니다. 이 게시물은 그런 내용을 공유 가능한 회의록 형태로 정리하는 데 유용합니다.\n\n먼저 전체 회의록 초안을 만들고,\n\n[[PROMPT:0]]\n\n필요하면 해야 할 일만 따로 추출해 실행 관리용으로 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "비정형 회의 메모를 회의록으로 정리",
+        "template_body": "당신은 업무 회의록 작성 도우미입니다.\n\n아래 회의 내용을 바탕으로 {{meeting_format}} 형식의 회의록을 작성해주세요.\n\n[회의 주제]\n{{meeting_topic}}\n\n[참석자]\n{{participants}}\n\n[회의 메모]\n{{raw_notes}}\n\n조건:\n- 원문에 없는 정보는 추정하지 말 것\n- 핵심 논의사항, 결정사항, 미결사항, 후속조치를 구분할 것\n- 공유 가능한 수준으로 깔끔하게 정리할 것\n- 보고서 문체로 작성할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "meeting_topic",
+            "label": "회의 주제",
+            "description": "회의 제목 또는 안건을 입력하세요",
+            "type": "text",
+            "sort_order": 0
+          },
+          {
+            "key": "participants",
+            "label": "참석자",
+            "description": "참석자를 쉼표 또는 줄바꿈으로 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "raw_notes",
+            "label": "회의 메모",
+            "description": "정리되지 않은 메모나 대화 내용을 입력하세요",
+            "type": "textarea",
+            "sort_order": 2
+          },
+          {
+            "key": "meeting_format",
+            "label": "회의록 형식",
+            "description": "원하는 회의록 형태를 선택하세요",
+            "type": "select",
+            "options": [
+              "공유용 회의록",
+              "간단 요약 회의록",
+              "보고용 회의 정리"
+            ],
+            "sort_order": 3
+          }
+        ]
+      },
+      {
+        "title": "회의 내용에서 실행 과제만 추출",
+        "template_body": "아래 회의 내용에서 실제로 해야 할 일만 추출해주세요.\n\n[회의 내용]\n{{meeting_content}}\n\n[정리 방식]\n{{output_style}}\n\n조건:\n- 해야 할 일만 목록으로 정리할 것\n- 담당자, 기한, 우선순위를 구분할 것\n- 정보가 없으면 '(확인 필요)'로 표기할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "meeting_content",
+            "label": "회의 내용",
+            "description": "회의록 또는 회의 메모 전체 내용을 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "output_style",
+            "label": "정리 방식",
+            "description": "결과 형식을 선택하세요",
+            "type": "select",
+            "options": ["표 형태", "불릿 목록", "우선순위 순 정리"],
+            "sort_order": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "보고용 요약·업무 공유 문안 작성 프롬프트",
+    "description": "긴 자료, 업무 진행상황, 검토 결과를 핵심만 간결하게 정리해 상사나 팀에 공유할 수 있는 보고 문안을 만드는 프롬프트입니다.",
+    "tags": ["업무", "보고", "요약", "공유", "문서정리"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n업무에서는 자료를 그대로 전달하기보다 핵심을 압축해서 공유해야 할 때가 많습니다. 이 게시물은 진행상황, 검토 결과, 참고자료를 보고용으로 정리하는 데 적합합니다.\n\n먼저 핵심 요약본을 만들고,\n\n[[PROMPT:0]]\n\n상황에 따라 보고 대상에 맞는 문안으로 다시 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "긴 자료를 핵심 보고용으로 요약",
+        "template_body": "당신은 업무 보고자료 정리 도우미입니다.\n\n아래 자료를 {{summary_format}} 형식으로 요약해주세요.\n\n[원문 또는 자료]\n{{source_content}}\n\n[특히 봐야 할 포인트]\n{{focus_points}}\n\n조건:\n- 핵심 내용 위주로 압축할 것\n- 읽는 사람이 빠르게 이해할 수 있게 정리할 것\n- 필요 시 주요 이슈와 시사점을 분리할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "source_content",
+            "label": "원문 또는 자료",
+            "description": "요약할 문서, 메모, 기사, 보고자료 등을 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "focus_points",
+            "label": "중점 포인트",
+            "description": "진행상황, 문제점, 일정, 비용 등 중점적으로 볼 항목을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "summary_format",
+            "label": "요약 형식",
+            "description": "원하는 결과 형식을 선택하세요",
+            "type": "select",
+            "options": [
+              "3줄 요약",
+              "불릿 요약",
+              "보고용 요약",
+              "상황 공유용 정리"
+            ],
+            "sort_order": 2
+          }
+        ]
+      },
+      {
+        "title": "보고 대상에 맞춰 문안 재구성",
+        "template_body": "아래 내용을 {{audience}}에게 공유하기 좋은 문안으로 재구성해주세요.\n\n[기준 내용]\n{{base_text}}\n\n[원하는 목적]\n{{sharing_goal}}\n\n조건:\n- 해당 대상이 바로 이해할 수 있는 표현으로 정리할 것\n- 배경, 현재 상황, 요청사항 또는 참고사항을 구분할 것\n- 길지 않게 실무용 문안으로 작성할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "audience",
+            "label": "공유 대상",
+            "description": "누구에게 공유할지 선택하세요",
+            "type": "select",
+            "options": ["팀장", "부서장", "팀원", "타부서", "외부 협업자"],
+            "sort_order": 0
+          },
+          {
+            "key": "base_text",
+            "label": "기준 내용",
+            "description": "기본이 되는 요약본이나 원문 핵심을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "sharing_goal",
+            "label": "공유 목적",
+            "description": "단순 공유, 검토 요청, 승인 요청, 참고 전달 등 목적을 입력하세요",
+            "type": "text",
+            "sort_order": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "협조 요청·자료 요청 문안 작성 프롬프트",
+    "description": "타부서나 동료에게 자료 제출, 확인 요청, 일정 협조, 업무 지원을 요청할 때 쓰는 정중하고 실무적인 문안을 만드는 프롬프트입니다.",
+    "tags": ["업무", "협조요청", "자료요청", "확인요청", "커뮤니케이션"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n일반 업무에서는 무언가를 직접 처리하는 것만큼 다른 사람에게 적절히 요청하는 것도 중요합니다. 이 게시물은 협조 요청, 자료 요청, 확인 요청 문안을 빠르게 정리할 때 유용합니다.\n\n먼저 요청 초안을 만들고,\n\n[[PROMPT:0]]\n\n필요하면 같은 내용을 재촉하지 않으면서도 일정이 보이게 후속 메시지로 바꿀 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "정중한 협조 요청 문안 작성",
+        "template_body": "당신은 실무 협조 요청 문안 작성 도우미입니다.\n\n아래 정보를 바탕으로 협조 요청 문안을 작성해주세요.\n\n[요청 대상]\n{{target}}\n\n[요청 내용]\n{{request_detail}}\n\n[요청 배경]\n{{background}}\n\n[희망 기한]\n{{deadline}}\n\n[원하는 톤]\n{{tone}}\n\n조건:\n- 부담스럽지 않으면서도 요청 내용이 명확하게 드러나게 작성할 것\n- 상대가 바로 이해할 수 있도록 항목을 정리할 것\n- 필요한 경우 회신 요청 문구도 포함할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "target",
+            "label": "요청 대상",
+            "description": "동료, 상사, 타부서, 외부업체 등 대상 정보를 입력하세요",
+            "type": "text",
+            "sort_order": 0
+          },
+          {
+            "key": "request_detail",
+            "label": "요청 내용",
+            "description": "무엇을 요청하는지 구체적으로 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "background",
+            "label": "요청 배경",
+            "description": "왜 필요한지 배경을 입력하세요",
+            "type": "textarea",
+            "sort_order": 2
+          },
+          {
+            "key": "deadline",
+            "label": "희망 기한",
+            "description": "회신 또는 자료 제출 기한을 입력하세요",
+            "type": "text",
+            "sort_order": 3
+          },
+          {
+            "key": "tone",
+            "label": "문체",
+            "description": "원하는 요청 문체를 선택하세요",
+            "type": "select",
+            "options": ["정중하게", "간결하게", "공식적으로", "부드럽게"],
+            "sort_order": 4
+          }
+        ]
+      },
+      {
+        "title": "후속 리마인드 문안 작성",
+        "template_body": "아래 요청 건에 대해 정중한 후속 리마인드 문안을 작성해주세요.\n\n[기존 요청 내용]\n{{previous_request}}\n\n[현재 상황]\n{{current_context}}\n\n[리마인드 목적]\n{{remind_goal}}\n\n조건:\n- 재촉하는 느낌을 줄이면서도 일정과 필요성을 분명히 할 것\n- 짧고 명확하게 작성할 것\n- 메일용과 메신저용 2가지 버전으로 제시할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "previous_request",
+            "label": "기존 요청 내용",
+            "description": "이전에 보냈던 요청 내용을 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "current_context",
+            "label": "현재 상황",
+            "description": "기한 임박, 회신 없음, 추가 확인 필요 등 상황을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "remind_goal",
+            "label": "리마인드 목적",
+            "description": "회신 요청, 자료 제출 요청, 일정 확인 등 목적을 입력하세요",
+            "type": "text",
+            "sort_order": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "업무 우선순위·오늘 할 일 정리 프롬프트",
+    "description": "쌓여 있는 업무를 긴급도와 중요도 기준으로 정리하고, 오늘 실제로 끝낼 수 있는 실행 계획으로 바꾸는 범용 생산성 프롬프트입니다.",
+    "tags": ["업무", "우선순위", "할일", "생산성", "일정관리"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n일반 업무에서는 해야 할 일이 많아질수록 무엇부터 처리할지 판단하는 데 시간이 많이 듭니다. 이 게시물은 업무를 재정렬하고 실행 가능한 계획으로 바꾸는 데 초점을 둡니다.\n\n먼저 업무 목록을 우선순위 기준으로 정리하고,\n\n[[PROMPT:0]]\n\n그 결과를 바탕으로 오늘 일정표 형태의 실행 계획으로 전환할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "업무 목록 우선순위 재정리",
+        "template_body": "당신은 업무 우선순위 정리 도우미입니다.\n\n아래 업무 목록을 보고 {{priority_framework}} 기준으로 우선순위를 정리해주세요.\n\n[업무 목록]\n{{task_list}}\n\n[마감 일정 및 제약]\n{{constraints}}\n\n[현재 가장 중요한 목표]\n{{main_goal}}\n\n조건:\n- 먼저 해야 할 업무부터 순서를 제시할 것\n- 긴급하지만 중요하지 않은 일과 중요하지만 시간이 필요한 일을 구분할 것\n- 보류 가능한 일도 따로 표시할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "task_list",
+            "label": "업무 목록",
+            "description": "현재 해야 할 일을 줄바꿈으로 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "constraints",
+            "label": "마감 및 제약",
+            "description": "오늘 마감, 회의 일정, 외부 의존성 등을 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "main_goal",
+            "label": "가장 중요한 목표",
+            "description": "오늘 또는 이번 주 가장 중요한 성과를 입력하세요",
+            "type": "text",
+            "sort_order": 2
+          },
+          {
+            "key": "priority_framework",
+            "label": "정리 기준",
+            "description": "원하는 정리 기준을 선택하세요",
+            "type": "select",
+            "options": [
+              "긴급도/중요도",
+              "오늘/이번주/보류",
+              "우선순위 1~3단계"
+            ],
+            "sort_order": 3
+          }
+        ]
+      },
+      {
+        "title": "오늘 실행 계획으로 변환",
+        "template_body": "아래 우선순위 정리 결과를 바탕으로 오늘 실행 계획을 짜주세요.\n\n[우선순위 결과]\n{{priority_result}}\n\n[사용 가능한 시간]\n{{available_time}}\n\n[추가 일정]\n{{fixed_schedule}}\n\n조건:\n- 실제 끝낼 수 있는 수준으로 계획할 것\n- 집중 업무와 단순 업무를 적절히 배치할 것\n- 오전/오후 또는 시간대별로 구분할 것\n- 마지막에 오늘 꼭 끝내야 할 핵심 3가지를 따로 정리할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "priority_result",
+            "label": "우선순위 결과",
+            "description": "앞 단계에서 정리한 우선순위 결과를 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "available_time",
+            "label": "사용 가능한 시간",
+            "description": "오늘 실제로 업무 가능한 시간을 입력하세요",
+            "type": "text",
+            "sort_order": 1
+          },
+          {
+            "key": "fixed_schedule",
+            "label": "고정 일정",
+            "description": "회의, 외근, 보고 등 이미 잡힌 일정을 입력하세요",
+            "type": "textarea",
+            "sort_order": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "인수인계·업무 진행상황 정리 프롬프트",
+    "description": "현재 진행 중인 업무를 다른 사람에게 설명하거나, 스스로도 다시 파악할 수 있도록 상태·이슈·다음 할 일을 정리하는 범용 업무 프롬프트입니다.",
+    "tags": ["업무", "인수인계", "진행상황", "업무정리", "협업"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n휴가, 부재, 담당 변경, 협업 상황에서는 내가 하던 일을 다른 사람이 빠르게 이해할 수 있게 정리해야 합니다. 이 게시물은 업무 현황과 다음 액션을 명확히 정리하는 데 적합합니다.\n\n먼저 인수인계용 현황 정리를 만들고,\n\n[[PROMPT:0]]\n\n필요하면 진행상황 보고용으로 더 짧게 바꿀 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "업무 인수인계 문서 초안 작성",
+        "template_body": "당신은 업무 인수인계 문서 작성 도우미입니다.\n\n아래 내용을 바탕으로 인수인계 문서를 작성해주세요.\n\n[업무명]\n{{work_title}}\n\n[현재까지 진행 내용]\n{{progress_summary}}\n\n[남은 할 일]\n{{remaining_tasks}}\n\n[주의사항 또는 이슈]\n{{issues}}\n\n[참고 자료 또는 위치]\n{{references}}\n\n조건:\n- 처음 보는 사람도 이해할 수 있게 작성할 것\n- 현재 상태, 다음 할 일, 유의사항을 명확히 구분할 것\n- 너무 장황하지 않게 실무용으로 정리할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          {
+            "key": "work_title",
+            "label": "업무명",
+            "description": "인수인계할 업무명을 입력하세요",
+            "type": "text",
+            "sort_order": 0
+          },
+          {
+            "key": "progress_summary",
+            "label": "진행 내용",
+            "description": "현재까지 무엇을 했는지 입력하세요",
+            "type": "textarea",
+            "sort_order": 1
+          },
+          {
+            "key": "remaining_tasks",
+            "label": "남은 할 일",
+            "description": "앞으로 처리해야 할 일을 입력하세요",
+            "type": "textarea",
+            "sort_order": 2
+          },
+          {
+            "key": "issues",
+            "label": "이슈 및 주의사항",
+            "description": "막힌 부분, 주의할 점, 확인 필요 사항을 입력하세요",
+            "type": "textarea",
+            "sort_order": 3
+          },
+          {
+            "key": "references",
+            "label": "참고 자료",
+            "description": "파일 위치, 링크, 담당자 등 참고 정보를 입력하세요",
+            "type": "textarea",
+            "sort_order": 4
+          }
+        ]
+      },
+      {
+        "title": "진행상황 공유용으로 간단 재정리",
+        "template_body": "아래 업무 현황을 {{share_format}} 형식으로 짧게 재정리해주세요.\n\n[업무 현황]\n{{work_status}}\n\n[공유 대상]\n{{audience}}\n\n조건:\n- 핵심만 빠르게 읽히게 정리할 것\n- 현재 상태, 이슈, 다음 액션을 포함할 것\n- 메신저나 짧은 메일에 붙여넣기 좋은 길이로 작성할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          {
+            "key": "work_status",
+            "label": "업무 현황",
+            "description": "인수인계 초안 또는 현재 업무 상태를 입력하세요",
+            "type": "textarea",
+            "sort_order": 0
+          },
+          {
+            "key": "audience",
+            "label": "공유 대상",
+            "description": "팀장, 동료, 협업자 등 공유 대상을 입력하세요",
+            "type": "text",
+            "sort_order": 1
+          },
+          {
+            "key": "share_format",
+            "label": "공유 형식",
+            "description": "원하는 결과 형식을 선택하세요",
+            "type": "select",
+            "options": ["메신저 공유용", "짧은 이메일용", "주간보고용"],
+            "sort_order": 2
+          }
+        ]
+      }
+    ]
+  }
+]
