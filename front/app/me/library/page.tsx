@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import PromptCard from '@/components/PromptCard';
@@ -10,7 +10,7 @@ import type { PromptCard as PromptCardType } from '@/lib/api';
 
 type Tab = 'my' | 'clips' | 'drafts';
 
-export default function LibraryPage() {
+function LibraryPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'my');
@@ -238,5 +238,13 @@ export default function LibraryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LibraryPage() {
+  return (
+    <Suspense>
+      <LibraryPageInner />
+    </Suspense>
   );
 }
