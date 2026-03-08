@@ -347,8 +347,8 @@ export default function PromptEditorPage({ promptId, token }: Props) {
           variables?: Array<{ key: string; description?: string }>;
           sort_order?: number; sortOrder?: number;
         }> = (postPromptsJson.data || []).sort(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (a: any, b: any) => (a.sort_order ?? a.sortOrder ?? 0) - (b.sort_order ?? b.sortOrder ?? 0)
+          (a: { sort_order?: number; sortOrder?: number }, b: { sort_order?: number; sortOrder?: number }) =>
+            (a.sort_order ?? a.sortOrder ?? 0) - (b.sort_order ?? b.sortOrder ?? 0)
         );
 
         // Reconstruct blocks from bodyMarkdown using [[PROMPT:N]] markers

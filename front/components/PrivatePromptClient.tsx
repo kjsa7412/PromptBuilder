@@ -37,9 +37,8 @@ export default function PrivatePromptClient({ promptId }: { promptId: string }) 
         });
         if (!res.ok) { setStatus(res.status === 403 || res.status === 404 ? 'forbidden' : 'error'); return; }
         const json = await res.json();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const p = (convertKeys(json.data || json) as any);
-        setPrompt(p as PromptDetail);
+          const p = convertKeys(json.data || json) as PromptDetail;
+        setPrompt(p);
         setStatus('ok');
       } catch {
         setStatus('error');
