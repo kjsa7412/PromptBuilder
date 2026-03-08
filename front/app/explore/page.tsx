@@ -177,7 +177,7 @@ function ExploreContent() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="제목, 설명 검색..."
-              className="input-base pl-10"
+              className="w-full bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 transition-all"
             />
           </div>
           {/* Mobile filter button */}
@@ -226,19 +226,19 @@ function ExploreContent() {
 
         {/* Results */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="card-grid">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-44 rounded-2xl skeleton" />
             ))}
           </div>
         ) : prompts.length === 0 ? (
-          <div className="text-center py-24 rounded-2xl border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/[0.02]">
+          <div className="text-center py-24 rounded-2xl border border-gray-100 dark:border-white/[0.06] bg-gray-50 dark:bg-white/[0.02]">
             <p className="text-3xl mb-3">🔍</p>
-            <p className="text-gray-500 dark:text-white/50 font-medium text-sm">검색 결과가 없습니다</p>
-            <p className="text-gray-400 dark:text-white/30 text-xs mt-1.5">다른 검색어나 태그를 시도해보세요</p>
+            <p className="text-gray-600 dark:text-zinc-400 font-medium text-sm">검색 결과가 없습니다</p>
+            <p className="text-gray-400 dark:text-zinc-500 text-xs mt-1.5">다른 검색어나 태그를 시도해보세요</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="card-grid">
             {prompts.map((p, i) => <PromptCard key={`${p.id}-${i}`} prompt={p} />)}
           </div>
         )}
@@ -263,15 +263,15 @@ export default function ExplorePage() {
       <div className="relative py-12 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 dot-grid opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-[#0a0a0f]" />
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-[1729px] mx-auto relative z-10">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">프롬프트 탐색</h1>
-          <p className="text-gray-400 dark:text-white/35 text-sm">커뮤니티가 공유한 최고의 AI 프롬프트를 찾아보세요</p>
+          <p className="text-gray-400 dark:text-zinc-500 text-sm">커뮤니티가 공유한 최고의 AI 프롬프트를 찾아보세요</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
+      <div className="max-w-[1729px] mx-auto px-4 sm:px-6 pb-24">
         <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="card-grid">
             {[...Array(6)].map((_, i) => <div key={i} className="h-44 rounded-2xl skeleton" />)}
           </div>
         }>

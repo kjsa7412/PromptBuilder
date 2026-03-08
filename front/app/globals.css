@@ -132,3 +132,22 @@ body {
 @media (max-width: 767px) {
   main { padding-bottom: 64px; }
 }
+
+/*
+ * Responsive card grid — 7-step size progression:
+ *  <640px        : 1 large col
+ *  640–767px     : 2 small cols  (sm)
+ *  768–1023px    : 2 large cols  (md)
+ *  1024–1279px   : 3 small cols  (lg)
+ *  1280–1535px   : 3 large cols  (xl)
+ *  1536–1728px   : 4 small cols  (2xl)
+ *  ≥1729px       : 4 large cols  (3xl)
+ */
+.card-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px)  { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1536px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }

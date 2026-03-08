@@ -11,9 +11,9 @@ const POPULAR_SEARCHES = ['회의록 정리', '마케팅 이메일', '코드 리
 async function getData() {
   try {
     const [trendingRes, randomRes, newRes, statsRes] = await Promise.allSettled([
-      api.getTrending(12, 0),
-      api.getRandom(12),
-      api.getNew(12, 0),
+      api.getTrending(4, 0),
+      api.getRandom(4),
+      api.getNew(4, 0),
       fetch(`${API_BASE}/api/public/stats`, { cache: 'no-store' }).then((r) => r.json()),
     ]);
     return {
@@ -112,7 +112,7 @@ export default async function HomePage() {
       </section>
 
       {/* Content sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+      <div className="max-w-[1729px] mx-auto px-4 sm:px-6 py-20">
         <HomeSections trending={trending} random={random} newPrompts={newPrompts} />
       </div>
     </div>
