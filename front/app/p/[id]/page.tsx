@@ -40,7 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   } catch {
-    return { title: 'PromptClip' };
+    // 비공개/초안/존재하지 않는 게시물: 검색 제외
+    return {
+      title: 'PromptClip',
+      robots: { index: false, follow: false },
+    };
   }
 }
 

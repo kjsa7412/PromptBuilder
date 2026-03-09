@@ -3,30 +3,31 @@ import './globals.css';
 import Header from '@/components/Header';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.promptclip.com'),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'PromptClip - AI 프롬프트 허브',
-    template: '%s | PromptClip',
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티. ChatGPT, Claude 등 AI를 위한 최고의 프롬프트를 찾아보세요.',
-  keywords: ['AI 프롬프트', 'ChatGPT 프롬프트', 'Claude 프롬프트', '프롬프트 템플릿', 'AI 활용'],
-  authors: [{ name: 'PromptClip' }],
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  authors: [{ name: siteConfig.name }],
   openGraph: {
     type: 'website',
-    locale: 'ko_KR',
-    url: 'https://www.promptclip.com',
-    siteName: 'PromptClip',
-    title: 'PromptClip - AI 프롬프트 허브',
-    description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'PromptClip' }],
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PromptClip - AI 프롬프트 허브',
-    description: 'AI 프롬프트 템플릿을 공유하고 활용하는 커뮤니티',
-    images: ['/og-image.png'],
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: [siteConfig.ogImage],
   },
   robots: {
     index: true,
@@ -34,7 +35,18 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
   alternates: {
-    canonical: 'https://www.promptclip.com',
+    canonical: siteConfig.url,
+    types: {
+      'application/rss+xml': [{ url: `${siteConfig.url}/rss.xml`, title: `${siteConfig.name} RSS 피드` }],
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  other: {
+    ...(process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+      ? { 'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION }
+      : {}),
   },
 };
 
