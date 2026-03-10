@@ -12,6 +12,8 @@ const CAT_NAV = [
   { label: '업무', href: '/explore?tag=업무' },
   { label: '일상', href: '/explore?tag=일상' },
   { label: '창작', href: '/explore?tag=창작' },
+  { label: '육아', href: '/explore?tag=육아' },
+  { label: '여행', href: '/explore?tag=여행' },
 ];
 
 export default function Header() {
