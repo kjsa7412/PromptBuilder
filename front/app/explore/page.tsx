@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PromptCard from '@/components/PromptCard';
 import { api } from '@/lib/api';
@@ -263,9 +264,20 @@ export default function ExplorePage() {
       <div className="relative py-12 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 dot-grid opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-[#0a0a0f]" />
-        <div className="max-w-[1729px] mx-auto relative z-10">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">프롬프트 탐색</h1>
-          <p className="text-gray-400 dark:text-zinc-500 text-sm">커뮤니티가 공유한 최고의 AI 프롬프트를 찾아보세요</p>
+        <div className="max-w-[1729px] mx-auto relative z-10 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">프롬프트 탐색</h1>
+            <p className="text-gray-400 dark:text-zinc-500 text-sm">커뮤니티가 공유한 최고의 AI 프롬프트를 찾아보세요</p>
+          </div>
+          <Link
+            href="/me/prompts/new"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 text-white hover:opacity-90 transition-all shadow-md shadow-violet-500/20"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="hidden sm:inline">새 프롬프트</span>
+          </Link>
         </div>
       </div>
 

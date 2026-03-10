@@ -98,6 +98,27 @@ export default function Header() {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
+          {/* New Prompt CTA — visible to all */}
+          <Link
+            href={session ? '/me/prompts/new' : '/login'}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-white/[0.10] text-gray-600 dark:text-white/60 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/[0.08] hover:border-gray-300 dark:hover:border-white/20 transition-all flex-shrink-0"
+          >
+            <svg className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            새 프롬프트
+          </Link>
+          {/* Mobile: icon only */}
+          <Link
+            href={session ? '/me/prompts/new' : '/login'}
+            className="sm:hidden p-2 rounded-lg text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.08] transition-all"
+            aria-label="새 프롬프트"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </Link>
+
           {/* Search icon → explore */}
           <Link
             href="/explore"

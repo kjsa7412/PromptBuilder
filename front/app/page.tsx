@@ -58,7 +58,7 @@ export default async function HomePage() {
           </p>
 
           {/* Search bar */}
-          <div className="relative max-w-lg mx-auto mb-6">
+          <div className="relative max-w-lg mx-auto mb-4">
             <div className="flex items-center bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 rounded-2xl shadow-lg shadow-violet-500/5 overflow-hidden focus-within:ring-2 focus-within:ring-violet-500/30 focus-within:border-violet-500/30 transition-all">
               <svg className="w-4 h-4 text-gray-400 dark:text-white/30 ml-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
@@ -73,6 +73,19 @@ export default async function HomePage() {
                 탐색
               </Link>
             </div>
+          </div>
+
+          {/* Make your own CTA */}
+          <div className="flex items-center justify-center mb-5">
+            <Link
+              href="/me/prompts/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl border border-violet-500/30 bg-violet-500/5 text-violet-600 dark:text-violet-300 hover:bg-violet-500/15 hover:border-violet-500/50 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              나도 프롬프트 만들기
+            </Link>
           </div>
 
           {/* Popular searches */}
