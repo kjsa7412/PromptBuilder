@@ -26,7 +26,7 @@ export async function GET() {
 
   let items = '';
   try {
-    const res = await fetch(`${apiBase}/api/public/prompts/new?limit=20`, {
+    const res = await fetch(`${apiBase}/api/public/prompts/new?limit=50`, {
       cache: 'no-store',
     });
     if (res.ok) {
