@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PromptVariable } from '@/lib/api';
 import { renderPrompt } from '@/lib/api';
 
@@ -17,6 +17,7 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
   const [generating, setGenerating] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const defaults: Record<string, string> = {};
@@ -54,6 +55,10 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
       const finalRendered = renderPrompt(templateBody, values);
       setRendered(finalRendered);
       onGenerate?.(finalRendered);
+      // 모바일에서 결과 영역으로 자동 스크롤
+      setTimeout(() => {
+        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
       window.dispatchEvent(new CustomEvent('promptGenerated', { detail: { promptId } }));
 
       // Fire-and-forget to increment generate_count on the backend
@@ -146,7 +151,7 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
       )}
 
       {rendered && (
-        <div className="space-y-3">
+        <div ref={resultRef} className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-500 dark:text-white/80 uppercase tracking-wider">완성된 프롬프트</h3>
           <pre className="bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 rounded-xl p-4 text-sm whitespace-pre-wrap text-gray-700 dark:text-white/80 min-h-[100px] font-mono max-h-96 overflow-y-auto touch-pan-y">
             {rendered}
