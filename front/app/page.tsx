@@ -33,7 +33,7 @@ export default async function HomePage() {
   return (
     <div className="bg-white dark:bg-[#0a0a0f]">
       {/* Hero */}
-      <section className="relative overflow-hidden min-h-[88vh] flex items-center justify-center noise-bg">
+      <section className="relative overflow-hidden flex flex-col items-center justify-center py-20 noise-bg">
         {/* Dot grid background */}
         <div className="absolute inset-0 dot-grid opacity-60" />
         {/* Gradient fade edges */}
@@ -47,7 +47,7 @@ export default async function HomePage() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 leading-[1.1]">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 leading-[1.1] break-keep">
             더 나은 AI 답변을
             <br />
             <span className="gradient-text">프롬프트로 시작하세요</span>
@@ -104,7 +104,7 @@ export default async function HomePage() {
         </div>
 
         {/* Stats strip */}
-        <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-8 text-sm">
+        <div className="relative z-10 flex items-center justify-center gap-8 text-sm mt-12">
           <div className="flex flex-col items-center gap-0.5">
             <span className="text-xl font-bold text-violet-500 dark:text-violet-400">
               {totalPrompts > 0 ? `${totalPrompts.toLocaleString()}+` : '∞'}
