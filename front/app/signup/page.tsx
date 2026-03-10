@@ -34,7 +34,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden">
+    <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-violet-400/10 dark:bg-violet-600/15 rounded-full blur-3xl" />

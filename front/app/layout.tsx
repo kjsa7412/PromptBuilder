@@ -69,14 +69,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col bg-white dark:bg-[#0a0a0f] text-gray-900 dark:text-white antialiased transition-colors duration-300">
+    <html lang="ko" suppressHydrationWarning className="h-full">
+      <body className="h-full flex flex-col bg-white dark:bg-[#0a0a0f] text-gray-900 dark:text-white antialiased transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Header />
-          <main className="flex-1">{children}</main>
-          <footer className="hidden md:block border-t border-gray-100 dark:border-white/5 py-6 text-center text-xs text-gray-400 dark:text-white/20">
-            &copy; 2026 PromptClip · AI 프롬프트 템플릿 커뮤니티
-          </footer>
+          <main className="flex-1 overflow-y-auto flex flex-col">
+            {children}
+            <footer className="hidden md:block mt-auto border-t border-gray-100 dark:border-white/5 py-6 text-center text-xs text-gray-400 dark:text-white/20">
+              &copy; 2026 PromptClip · AI 프롬프트 템플릿 커뮤니티
+            </footer>
+          </main>
           <MobileBottomNav />
         </ThemeProvider>
       </body>

@@ -64,14 +64,14 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-gray-400 dark:text-white/40">로딩 중...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0f]">
+    <div className="bg-white dark:bg-[#0a0a0f]">
       <div className="max-w-2xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">프로필 관리</h1>
 

@@ -27,7 +27,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden">
+    <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-violet-400/10 dark:bg-violet-600/15 rounded-full blur-3xl" />
@@ -35,13 +35,6 @@ export default function LoginPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto px-6">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
-            PromptClip
-          </Link>
-        </div>
-
         <div className="p-8 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 backdrop-blur-xl">
           <div className="text-center mb-8">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-1">환영합니다</h1>

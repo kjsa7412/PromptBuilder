@@ -18,7 +18,7 @@ export default function NewPromptPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-gray-400 dark:text-white/40">로딩 중...</div>
       </div>
     );

@@ -155,7 +155,7 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
                   <span className="text-sm font-medium text-gray-800 dark:text-white">
                     {pp.title}
                   </span>
-                  {pp.status && (
+                  {pp.status && pp.status !== 'complete' && (
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         STATUS_COLORS[pp.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.draft

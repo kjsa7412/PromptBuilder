@@ -63,4 +63,6 @@ public interface PromptMapper {
     void updateVisibility(Map<String, Object> params);
 
     List<Map<String, Object>> findMyDraftPrompts(@Param("userId") String userId);
+
+    List<Map<String, Object>> findTagsWithCount();
 }

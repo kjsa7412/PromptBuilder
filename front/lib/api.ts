@@ -143,6 +143,9 @@ export const api = {
   getStats: (): Promise<{ data: { totalPrompts: number } }> =>
     fetchApi('/api/public/stats'),
 
+  getTags: (): Promise<{ data: { tag: string; count: number }[] }> =>
+    fetchApi('/api/public/tags'),
+
   // 클립 (북마크 대체)
   getClips: (token: string): Promise<{ data: PromptCard[] }> =>
     fetchApiAuth('/api/me/clips', token),

@@ -254,6 +254,15 @@
         WHERE id = #{id}::uuid AND user_id = #{userId}::uuid AND is_deleted = false
     </update>
 
+    <!-- 태그별 게시물 수 -->
+    <select id="findTagsWithCount" resultType="java.util.HashMap">
+        SELECT tag, COUNT(*) AS count
+        FROM prompts, UNNEST(tags) AS tag
+        WHERE visibility = 'public' AND is_deleted = false
+        GROUP BY tag
+        ORDER BY count DESC
+    </select>
+
     <!-- 임시저장 목록 (draft) -->
     <select id="findMyDraftPrompts" resultType="java.util.HashMap">
         SELECT id, title, description, tags, visibility,

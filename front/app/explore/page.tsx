@@ -260,7 +260,7 @@ function ExploreContent() {
 
 export default function ExplorePage() {
   return (
-    <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
+    <div className="bg-white dark:bg-[#0a0a0f]">
       <div className="relative py-12 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 dot-grid opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-[#0a0a0f]" />

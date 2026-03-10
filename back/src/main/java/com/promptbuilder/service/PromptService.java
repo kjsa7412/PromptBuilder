@@ -311,6 +311,10 @@ public class PromptService {
     /**
      * 템플릿의 {{key}} 를 values로 치환한다.
      */
+    public List<Map<String, Object>> getTagsWithCount() {
+        return promptMapper.findTagsWithCount();
+    }
+
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalPrompts", promptMapper.countPublic());

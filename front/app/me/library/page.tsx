@@ -73,7 +73,7 @@ function LibraryPageInner() {
   const items = tab === 'my' ? myPrompts : tab === 'clips' ? clips : drafts;
 
   return (
-    <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
+    <div className="bg-white dark:bg-[#0a0a0f]">
       {/* Header */}
       <div className="relative py-16 px-6 overflow-hidden">
         <div className="absolute top-0 right-1/3 w-96 h-48 bg-pink-400/10 dark:bg-pink-600/10 rounded-full blur-3xl" />

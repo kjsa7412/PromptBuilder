@@ -69,7 +69,7 @@ export default async function PromptDetailPage({ params }: Props) {
     };
 
     return (
-      <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
+      <div className="bg-white dark:bg-[#0a0a0f]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

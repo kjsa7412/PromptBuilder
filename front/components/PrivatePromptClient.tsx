@@ -49,7 +49,7 @@ export default function PrivatePromptClient({ promptId }: { promptId: string }) 
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-gray-400 dark:text-white/40">로딩 중...</div>
       </div>
     );
@@ -57,7 +57,7 @@ export default function PrivatePromptClient({ promptId }: { promptId: string }) 
 
   if (status === 'forbidden') {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-center space-y-2">
           <p className="text-gray-500 dark:text-white/50">비공개 게시물이거나 존재하지 않는 페이지입니다.</p>
           <a href="/" className="text-sm text-violet-500 hover:underline">홈으로 돌아가기</a>
@@ -68,14 +68,14 @@ export default function PrivatePromptClient({ promptId }: { promptId: string }) 
 
   if (status === 'error' || !prompt) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <p className="text-gray-400 dark:text-white/40">오류가 발생했습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#0a0a0f] min-h-screen">
+    <div className="bg-white dark:bg-[#0a0a0f]">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <PromptDetailClient prompt={prompt} />
       </div>

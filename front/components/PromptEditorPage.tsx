@@ -802,7 +802,7 @@ export default function PromptEditorPage({ promptId, token }: Props) {
   // ─── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
+      <div className="flex-1 bg-white dark:bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-gray-400 dark:text-white/40">로딩 중...</div>
       </div>
     );
@@ -815,13 +815,13 @@ export default function PromptEditorPage({ promptId, token }: Props) {
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
     <div
-      className="bg-white dark:bg-[#0a0a0f] min-h-screen"
+      className="bg-white dark:bg-[#0a0a0f]"
       onClick={() => slashState && setSlashState(null)}
     >
       {/* Top bar */}
       <div className="sticky top-0 z-20 bg-white/90 dark:bg-[#0a0a0f]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-          <h1 className="text-base font-semibold text-gray-900 dark:text-white flex-shrink-0">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex flex-wrap items-center gap-2">
+          <h1 className="text-base font-semibold text-gray-900 dark:text-white flex-shrink-0 mr-auto sm:mr-0">
             {isEdit ? '프롬프트 수정' : '새 프롬프트 작성'}
           </h1>
 
@@ -852,7 +852,7 @@ export default function PromptEditorPage({ promptId, token }: Props) {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
               value={visibility}
               onChange={(e) => setVisibility(e.target.value as 'private' | 'public')}
@@ -864,14 +864,14 @@ export default function PromptEditorPage({ promptId, token }: Props) {
             <button
               onClick={() => handleSave('draft')}
               disabled={saving}
-              className="px-4 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/20 transition-all disabled:opacity-40"
+              className="px-3 py-1.5 text-sm rounded-lg bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-white/70 hover:bg-gray-200 dark:hover:bg-white/20 transition-all disabled:opacity-40 whitespace-nowrap"
             >
               임시저장
             </button>
             <button
               onClick={() => handleSave(visibility)}
               disabled={saving}
-              className="px-4 py-1.5 text-sm rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium hover:opacity-90 transition-all disabled:opacity-40"
+              className="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 text-white font-medium hover:opacity-90 transition-all disabled:opacity-40 whitespace-nowrap"
             >
               {saving ? '저장 중...' : '발행하기'}
             </button>
