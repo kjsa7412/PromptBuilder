@@ -1,0 +1,365 @@
+[
+  {
+    "title": "해외여행 전체 일정 자동 설계 프롬프트",
+    "description": "출발지, 여행지, 기간, 예산, 동행자, 스타일을 반영해 현실적인 해외여행 일정을 짜주는 핵심 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "여행일정", "자유여행", "코스추천"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행에서 가장 자주 필요한 것은 내 상황에 맞는 전체 일정입니다. 이 게시물은 예쁜 장소만 나열하는 것이 아니라 비행, 체크인, 식사, 이동, 휴식, 사진 포인트, 우천 대안까지 반영한 실행형 일정을 만드는 데 초점을 둡니다.\n\n먼저 전체 일정을 설계하고,\n\n[[PROMPT:0]]\n\n이미 생각해둔 후보지가 있다면 실제 동선 기준으로 다시 다듬을 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "해외여행 전체 일정 설계",
+        "template_body": "당신은 해외여행 전문 플래너입니다.\n\n아래 조건에 맞춰 해외여행 일정을 짜주세요.\n\n[출발지]\n{{departure}}\n\n[여행지]\n{{destination}}\n\n[여행 기간]\n{{duration}}\n\n[동행자]\n{{companions}}\n\n[여행 스타일]\n{{travel_style}}\n\n[예산]\n{{budget}}\n\n[중요 조건]\n{{important_conditions}}\n\n조건:\n- 비행 도착일과 출국일의 피로도를 고려한 현실적인 일정으로 짤 것\n- 관광, 식사, 카페, 쇼핑, 휴식의 균형을 맞출 것\n- 하루에 너무 많은 장소를 억지로 넣지 말 것\n- 각 장소마다 추천 이유를 한 줄씩 적을 것\n- 우천 시 대체 코스와 체력 저하 시 축소 코스를 함께 제안할 것\n- 마지막에 예약 우선순위가 높은 항목과 현지에서 유동적으로 조정 가능한 항목을 구분할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "departure", "label": "출발지", "description": "출발 도시 또는 공항을 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "destination", "label": "여행지", "description": "여행 국가 및 도시를 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "duration", "label": "여행 기간", "description": "3박 4일, 5박 6일 등 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "companions", "label": "동행자", "description": "혼자, 친구, 연인, 가족 등 입력하세요", "type": "text", "sort_order": 3 },
+          { "key": "travel_style", "label": "여행 스타일", "description": "맛집, 쇼핑, 미술관, 야경, 휴양, 사진 등 원하는 스타일을 입력하세요", "type": "textarea", "sort_order": 4 },
+          { "key": "budget", "label": "예산", "description": "총예산 또는 1인당 예산을 입력하세요", "type": "text", "sort_order": 5 },
+          { "key": "important_conditions", "label": "중요 조건", "description": "걷는 거리 적게, 아침 약함, 쇼핑 많이, 유명지 필수 등 조건을 입력하세요", "type": "textarea", "sort_order": 6 }
+        ]
+      },
+      {
+        "title": "후보지 목록을 실제 동선으로 재구성",
+        "template_body": "당신은 해외여행 동선 최적화 도우미입니다.\n\n아래 후보지 목록을 실제 여행 일정으로 재구성해주세요.\n\n[도시]\n{{city}}\n\n[후보지 목록]\n{{candidate_places}}\n\n[식사 취향]\n{{food_preference}}\n\n[이동 제약]\n{{movement_limit}}\n\n조건:\n- 위치상 비효율적인 순서는 과감히 정리할 것\n- 꼭 갈 만한 곳, 취향이면 좋은 곳, 빼도 되는 곳으로 나눌 것\n- 동네별로 묶어서 하루 일정표 형태로 다시 배치할 것\n- 웨이팅, 예약, 야경 시간대, 휴식 타이밍까지 고려할 것\n- 마지막에 과한 부분과 무리 없는 수정안을 함께 제시할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "여행 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "candidate_places", "label": "후보지 목록", "description": "가고 싶은 장소를 줄바꿈으로 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "food_preference", "label": "식사 취향", "description": "현지 음식, 카페, 브런치, 파인다이닝 등 입력하세요", "type": "textarea", "sort_order": 2 },
+          { "key": "movement_limit", "label": "이동 제약", "description": "계단 약함, 장거리 도보 힘듦, 늦은 밤 이동 피함 등 입력하세요", "type": "textarea", "sort_order": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "여권·비자·입국서류 체크리스트 프롬프트",
+    "description": "여권 유효기간, 입국 요건, 비자, 환승 요건, 건강 서류까지 빠뜨리기 쉬운 출국 전 체크리스트를 정리하는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "여권", "비자", "입국요건"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행은 일정만 잘 짜도 되는 것이 아니라 출발 자체가 가능한지를 먼저 확인해야 합니다. 이 게시물은 여권, 비자, 환승, 건강 서류, 약 반입, 기본 준비를 빠짐없이 확인하는 데 적합합니다.\n\n먼저 전체 체크리스트를 만들고,\n\n[[PROMPT:0]]\n\n복잡한 다구간 일정이라면 환승까지 포함해 다시 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "출국 전 서류 체크리스트 만들기",
+        "template_body": "당신은 해외여행 출국 준비 점검 도우미입니다.\n\n아래 여정을 기준으로 출국 전에 반드시 확인해야 할 서류와 조건을 체크리스트로 정리해주세요.\n\n[국적]\n{{nationality}}\n\n[출발지]\n{{departure}}\n\n[목적지]\n{{destination}}\n\n[경유지 또는 환승지]\n{{transit}}\n\n[여행 목적]\n{{trip_purpose}}\n\n[현재 내가 준비한 것]\n{{current_preparation}}\n\n조건:\n- 여권 유효기간, 비자 또는 전자여행허가, 입국 신고 관련 준비, 환승 시 유의점, 건강 관련 서류 확인 필요 여부, 약 반입 확인 필요 여부를 포함할 것\n- '이미 준비함 / 지금 확인 필요 / 공식 사이트 재확인 필요'로 나눠서 정리할 것\n- 실제 규정은 공식 사이트에서 최종 확인해야 한다는 전제로, 준비 항목을 구조적으로 정리할 것\n- 마지막에 출발 7일 전, 3일 전, 출발 전날에 각각 확인할 항목을 나눠서 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "nationality", "label": "국적", "description": "본인 국적을 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "departure", "label": "출발지", "description": "출발 국가와 도시를 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "destination", "label": "목적지", "description": "도착 국가와 도시를 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "transit", "label": "환승지", "description": "환승 국가/도시가 있으면 입력하세요", "type": "textarea", "sort_order": 3 },
+          { "key": "trip_purpose", "label": "여행 목적", "description": "관광, 출장, 방문 등 입력하세요", "type": "text", "sort_order": 4 },
+          { "key": "current_preparation", "label": "현재 준비 상태", "description": "여권 있음, 비자 신청 안 함 등 현재 상태를 입력하세요", "type": "textarea", "sort_order": 5 }
+        ]
+      },
+      {
+        "title": "다구간 여정 서류 리스크 정리",
+        "template_body": "아래 다구간 해외여행 일정을 보고, 서류와 입국/환승 측면에서 놓치기 쉬운 위험 포인트를 정리해주세요.\n\n[여정 전체]\n{{itinerary}}\n\n조건:\n- 출발국, 환승국, 도착국별로 구분해서 정리할 것\n- 여권, 비자, 전자허가, 환승, 수하물 연결, 재체크인 가능성, 약 반입 확인 포인트를 포함할 것\n- 사실 단정이 아니라 '확인해야 할 포인트' 중심으로 작성할 것\n- 마지막에 공식 사이트에서 반드시 다시 확인할 질문 목록을 적을 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "itinerary", "label": "여정 전체", "description": "항공편과 도시 이동 순서를 자세히 입력하세요", "type": "textarea", "sort_order": 0 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "항공권·환승·공항 이동 플랜 프롬프트",
+    "description": "비행편 선택, 환승 난이도, 공항에서 숙소까지 이동, 밤도착 리스크까지 포함한 항공 이동 계획 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "항공권", "환승", "공항이동"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행은 도시에 도착하는 순간보다 공항에 도착하는 순간부터 체력이 갈립니다. 이 게시물은 비행 스케줄, 환승 난이도, 공항 이동, 늦은 도착 리스크를 함께 보는 데 유용합니다.\n\n먼저 이동 플랜을 짜고,\n\n[[PROMPT:0]]\n\n기존 항공권 후보가 있다면 체력과 일정 기준으로 비교할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "공항부터 숙소까지 이동 플랜 설계",
+        "template_body": "당신은 해외여행 항공 이동 플래너입니다.\n\n아래 조건을 바탕으로 비행, 환승, 공항 도착 후 숙소까지의 이동 플랜을 짜주세요.\n\n[출발 공항]\n{{departure_airport}}\n\n[도착 공항]\n{{arrival_airport}}\n\n[환승 여부]\n{{transit_info}}\n\n[도착 시간대]\n{{arrival_time}}\n\n[숙소 위치]\n{{hotel_area}}\n\n[동행자 및 짐 상황]\n{{baggage_condition}}\n\n조건:\n- 환승 부담, 입국 심사, 수하물 찾기, 시차 적응, 야간 이동 리스크를 고려할 것\n- 공항철도, 버스, 택시, 픽업 서비스 중 어떤 방식이 적합한지 비교할 것\n- 밤 늦게 도착하는 경우와 낮 도착하는 경우를 나눠 안내할 것\n- 숙소 체크인 시간과 연결되도록 조정할 것\n- 마지막에 '도착 당일 절대 무리하지 말아야 할 포인트'를 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "departure_airport", "label": "출발 공항", "description": "출발 공항을 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "arrival_airport", "label": "도착 공항", "description": "도착 공항을 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "transit_info", "label": "환승 정보", "description": "직항, 1회 환승, 환승 공항 등 입력하세요", "type": "textarea", "sort_order": 2 },
+          { "key": "arrival_time", "label": "도착 시간대", "description": "오전, 오후, 심야 등 입력하세요", "type": "text", "sort_order": 3 },
+          { "key": "hotel_area", "label": "숙소 위치", "description": "숙소 지역 또는 주소를 입력하세요", "type": "text", "sort_order": 4 },
+          { "key": "baggage_condition", "label": "짐 상황", "description": "캐리어 큼, 유모차 있음, 아이 동반 등 입력하세요", "type": "textarea", "sort_order": 5 }
+        ]
+      },
+      {
+        "title": "항공권 후보 체력 기준 비교",
+        "template_body": "당신은 해외여행 항공권 비교 도우미입니다.\n\n아래 항공권 후보를 보고 여행 만족도 기준으로 비교해주세요.\n\n[여행지]\n{{destination}}\n\n[항공권 후보]\n{{flight_candidates}}\n\n[내 우선순위]\n{{priority}}\n\n조건:\n- 가격만이 아니라 출발/도착 시간, 환승 길이, 체력 소모, 첫날 일정 영향, 마지막 날 피로도까지 고려할 것\n- 꼭 좋은 선택 / 무난한 선택 / 피하고 싶은 선택으로 나눌 것\n- 왜 그렇게 판단했는지 여행자 입장에서 설명할 것\n- 마지막에 '돈을 조금 더 써도 좋은 구간'과 '절약해도 되는 구간'을 구분할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "여행지를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "flight_candidates", "label": "항공권 후보", "description": "비행편 후보를 붙여넣으세요", "type": "textarea", "sort_order": 1 },
+          { "key": "priority", "label": "우선순위", "description": "최저가, 체력, 첫날 활용, 마일리지 등 우선순위를 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "숙소 지역 선택·치안·동선 비교 프롬프트",
+    "description": "도시 안에서 어느 동네에 숙소를 잡아야 하는지, 관광·식사·교통·야간 이동 기준으로 비교하는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "숙소", "호텔", "지역선택"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n같은 도시라도 어느 지역에 숙소를 잡느냐에 따라 여행 난이도가 크게 달라집니다. 이 게시물은 관광지 접근성뿐 아니라 식사, 야간 이동, 소음, 분위기까지 함께 보며 지역을 고르는 데 적합합니다.\n\n먼저 숙소 지역을 비교하고,\n\n[[PROMPT:0]]\n\n후보 숙소가 있다면 실제 여행 목적에 맞춰 다시 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "도시별 숙소 지역 비교",
+        "template_body": "당신은 해외도시 숙소 선택 도우미입니다.\n\n아래 조건을 바탕으로 어느 동네에 숙소를 잡는 것이 좋은지 비교해주세요.\n\n[도시]\n{{city}}\n\n[여행 목적]\n{{trip_goal}}\n\n[동행자]\n{{companions}}\n\n[원하는 분위기]\n{{preferred_vibe}}\n\n[피하고 싶은 것]\n{{avoid_points}}\n\n조건:\n- 관광 접근성, 식당 밀집도, 대중교통 편의, 야간 이동 부담, 소음 가능성, 치안 체감, 쇼핑 접근성, 체크인 후 동선까지 고려할 것\n- '초보 여행자에게 좋은 지역', '감성은 좋지만 호불호 있는 지역', '이번 여행엔 비추천 지역'으로 나눌 것\n- 마지막에 숙소 예약 전에 지도에서 체크할 포인트를 10개 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "숙소를 잡을 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "trip_goal", "label": "여행 목적", "description": "관광, 쇼핑, 야경, 휴양, 미식 등 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "companions", "label": "동행자", "description": "혼자, 연인, 친구, 가족 등 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "preferred_vibe", "label": "원하는 분위기", "description": "조용함, 감성, 편리함, 밤문화, 로컬감성 등 입력하세요", "type": "textarea", "sort_order": 3 },
+          { "key": "avoid_points", "label": "피하고 싶은 것", "description": "오르막, 심야 소음, 복잡한 환승 등 입력하세요", "type": "textarea", "sort_order": 4 }
+        ]
+      },
+      {
+        "title": "숙소 후보 비교표 만들기",
+        "template_body": "당신은 해외여행 숙소 비교 도우미입니다.\n\n아래 숙소 후보를 여행 흐름에 맞춰 비교해주세요.\n\n[도시]\n{{city}}\n\n[숙소 후보]\n{{hotel_candidates}}\n\n[중요 기준]\n{{important_criteria}}\n\n조건:\n- 가격만이 아니라 위치, 역 접근성, 공항 이동, 밤 늦게 돌아와도 괜찮은지, 주변 식당과 편의점, 체크인 편의, 소음 가능성까지 고려할 것\n- 표 형태와 요약 코멘트를 함께 줄 것\n- 가장 추천하는 1곳과 차선책 1곳을 고를 것\n- 예약 전에 숙소에 문의하면 좋은 질문도 함께 제안할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "hotel_candidates", "label": "숙소 후보", "description": "숙소 후보 목록을 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "important_criteria", "label": "중요 기준", "description": "엘리베이터, 조식, 역세권, 욕조 등 중요 기준을 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "환전·카드·ATM·예산 관리 프롬프트",
+    "description": "해외여행 예산을 항공·숙소·식비·교통·쇼핑으로 나누고, 현금과 카드 사용 전략까지 정리하는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "환전", "카드", "예산관리"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행은 총예산보다도 현지에서 어떻게 돈을 쓰느냐가 중요합니다. 이 게시물은 환전, 카드, ATM 사용, 식비·교통비·쇼핑비 분리까지 함께 보는 데 적합합니다.\n\n먼저 전체 예산표를 만들고,\n\n[[PROMPT:0]]\n\n현지 결제 전략이 궁금하다면 카드와 현금 비중도 따로 설계할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "해외여행 예산표 설계",
+        "template_body": "당신은 해외여행 예산 설계 도우미입니다.\n\n아래 정보를 바탕으로 해외여행 예산표를 짜주세요.\n\n[여행지]\n{{destination}}\n\n[여행 기간]\n{{duration}}\n\n[인원]\n{{people_count}}\n\n[총예산]\n{{total_budget}}\n\n[여행 스타일]\n{{travel_style}}\n\n조건:\n- 항공, 숙소, 교통, 식비, 카페/간식, 입장료/체험, 쇼핑, 비상금으로 나눠 예산을 배분할 것\n- 가성비형과 만족도 우선형 두 가지 안으로 제시할 것\n- 절약하면 좋은 항목과 돈을 써야 만족도가 올라가는 항목을 구분할 것\n- 마지막에 '예산 초과가 잘 나는 지점'과 '미리 상한선을 정하면 좋은 지점'을 정리할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "국가와 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "people_count", "label": "인원", "description": "총 인원을 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "total_budget", "label": "총예산", "description": "총예산을 입력하세요", "type": "text", "sort_order": 3 },
+          { "key": "travel_style", "label": "여행 스타일", "description": "쇼핑 위주, 식도락 위주, 관광 위주 등 입력하세요", "type": "textarea", "sort_order": 4 }
+        ]
+      },
+      {
+        "title": "현금·카드·ATM 사용 전략 정리",
+        "template_body": "당신은 해외여행 결제 전략 도우미입니다.\n\n아래 여행 조건을 바탕으로 현금, 카드, ATM 인출의 사용 전략을 정리해주세요.\n\n[여행지]\n{{destination}}\n\n[여행 방식]\n{{travel_mode}}\n\n[지출 성향]\n{{spending_pattern}}\n\n[걱정되는 점]\n{{worry_points}}\n\n조건:\n- 교통, 소액결제, 식당, 쇼핑, 비상 상황에서 무엇이 편한지 구분할 것\n- 현금을 너무 많이 들고 다니는 위험과 카드만 믿는 위험을 균형 있게 설명할 것\n- 환전 시점, 현지 도착 직후 쓸 최소 현금, 카드 분산 보관 아이디어를 포함할 것\n- 마지막에 출발 전 금융 관련 체크리스트를 적을 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "여행지를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "travel_mode", "label": "여행 방식", "description": "자유여행, 패키지, 도시 중심, 지방 이동 포함 등 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "spending_pattern", "label": "지출 성향", "description": "소액결제 많음, 쇼핑 많음, 교통 많음 등 입력하세요", "type": "textarea", "sort_order": 2 },
+          { "key": "worry_points", "label": "걱정 포인트", "description": "분실, 환전, 수수료, 카드 승인 오류 등 입력하세요", "type": "textarea", "sort_order": 3 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "짐싸기·의약품·여행 준비물 프롬프트",
+    "description": "기본 짐, 계절 옷차림, 전자기기, 상비약, 처방약, 장시간 비행 준비까지 포함한 준비물 체크 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "짐싸기", "준비물", "의약품"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행 준비물은 너무 많이 챙겨도 문제고 빠뜨려도 문제입니다. 이 게시물은 여행지, 계절, 일정, 건강 상태에 따라 꼭 필요한 것만 압축해서 정리하는 데 적합합니다.\n\n먼저 전체 준비물 체크리스트를 만들고,\n\n[[PROMPT:0]]\n\n약과 건강 관련 준비는 별도로 더 꼼꼼하게 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "해외여행 짐싸기 체크리스트",
+        "template_body": "당신은 해외여행 준비물 정리 도우미입니다.\n\n아래 조건을 바탕으로 짐싸기 체크리스트를 만들어주세요.\n\n[여행지]\n{{destination}}\n\n[여행 시기]\n{{season_or_weather}}\n\n[여행 기간]\n{{duration}}\n\n[여행 스타일]\n{{travel_style}}\n\n[짐 제한 또는 특이사항]\n{{packing_limit}}\n\n조건:\n- 서류, 의류, 세면/건강, 전자기기, 기내용, 현지필수품으로 나눠 정리할 것\n- 꼭 필요한 것과 있으면 좋은 것을 구분할 것\n- 장시간 비행 대비 아이템과 현지 날씨 대비 아이템을 포함할 것\n- 마지막에 출발 전날 밤 체크리스트와 공항 가기 직전 체크리스트를 따로 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "국가와 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "season_or_weather", "label": "시기/날씨", "description": "여행 시기와 예상 날씨를 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "travel_style", "label": "여행 스타일", "description": "도시관광, 휴양, 트레킹, 출장 등 입력하세요", "type": "textarea", "sort_order": 3 },
+          { "key": "packing_limit", "label": "짐 제한", "description": "기내용만, 위탁 1개, 아이 동반 등 입력하세요", "type": "textarea", "sort_order": 4 }
+        ]
+      },
+      {
+        "title": "의약품·건강 준비 체크리스트",
+        "template_body": "당신은 해외여행 건강 준비 도우미입니다.\n\n아래 상황을 바탕으로 여행 건강 준비 체크리스트를 만들어주세요.\n\n[여행지]\n{{destination}}\n\n[여행 기간]\n{{duration}}\n\n[복용 중인 약 또는 건강 이슈]\n{{health_info}}\n\n조건:\n- 처방약, 상비약, 기내용으로 따로 챙길 것, 장거리 비행 대비 준비, 현지에서 구하기 어려울 수 있는 기본품을 구분할 것\n- 나라별 약 반입 규정은 공식 확인이 필요하다는 전제로, 준비 관점에서 정리할 것\n- 약 포장, 처방전 사본, 영문명 확인 같은 실무적인 포인트를 포함할 것\n- 마지막에 출국 전 병원이나 약국에 물어보면 좋은 질문 목록을 제시할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "여행지를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "health_info", "label": "건강 정보", "description": "알레르기, 처방약, 멀미, 위장 약함 등 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "아이 동반 해외여행 프롬프트",
+    "description": "유아·어린이 동반 해외여행에서 비행, 낮잠, 식사, 유모차, 숙소, 일정 밀도를 현실적으로 맞추는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "아이와여행", "가족여행", "유아동반"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n아이와 가는 해외여행은 예쁜 코스보다 무리 없는 흐름이 중요합니다. 이 게시물은 비행, 식사, 낮잠, 유모차, 실내 대안까지 반영한 가족형 해외여행 계획에 초점을 둡니다.\n\n먼저 전체 일정을 만들고,\n\n[[PROMPT:0]]\n\n숙소와 식당을 고를 때의 기준도 따로 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "아이 동반 해외여행 일정 설계",
+        "template_body": "당신은 아이 동반 해외여행 전문 플래너입니다.\n\n아래 정보를 바탕으로 아이와 함께 가는 해외여행 일정을 짜주세요.\n\n[여행지]\n{{destination}}\n\n[아이 나이]\n{{child_age}}\n\n[여행 기간]\n{{duration}}\n\n[비행 시간]\n{{flight_time}}\n\n[아이 성향]\n{{child_style}}\n\n[부모가 원하는 분위기]\n{{parent_style}}\n\n[중요 조건]\n{{important_conditions}}\n\n조건:\n- 아이의 비행 피로, 낮잠, 간식, 화장실, 유모차, 긴 대기 스트레스를 고려할 것\n- 실내와 실외를 적절히 섞을 것\n- 무리한 장거리 이동은 피하고, 하루에 확실한 메인 포인트만 잡을 것\n- 부모도 만족할 수 있는 식사나 카페 타이밍을 포함할 것\n- 마지막에 '아이 동반 여행에서 예약 전에 꼭 확인할 것'을 정리할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "국가와 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "child_age", "label": "아이 나이", "description": "개월 수 또는 나이를 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "flight_time", "label": "비행 시간", "description": "직항 몇 시간, 환승 포함 총 몇 시간 등 입력하세요", "type": "text", "sort_order": 3 },
+          { "key": "child_style", "label": "아이 성향", "description": "낯가림, 잠 민감, 오래 못 앉아있음 등 입력하세요", "type": "textarea", "sort_order": 4 },
+          { "key": "parent_style", "label": "부모 스타일", "description": "관광 반반, 맛집 필수, 휴양 중심 등 입력하세요", "type": "textarea", "sort_order": 5 },
+          { "key": "important_conditions", "label": "중요 조건", "description": "유모차, 키즈풀, 조식, 근거리 이동 등 입력하세요", "type": "textarea", "sort_order": 6 }
+        ]
+      },
+      {
+        "title": "아이 동반 숙소·식당 선택 기준표",
+        "template_body": "아이와 해외여행 갈 때 숙소와 식당을 고를 때 체크해야 할 기준표를 만들어주세요.\n\n[아이 나이]\n{{child_age}}\n\n[여행지]\n{{destination}}\n\n[가장 걱정되는 점]\n{{worry_points}}\n\n조건:\n- 숙소 편의, 식당 편의, 이동 편의, 돌발상황 대응으로 나눠 정리할 것\n- 엘리베이터, 침대 안전, 아침 식사, 유아식 가능성, 대기시간, 화장실, 유모차, 빨래, 편의점 접근을 포함할 것\n- 마지막에 예약 전에 숙소/식당에 물어볼 질문 10개를 작성할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "child_age", "label": "아이 나이", "description": "아이 나이를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "destination", "label": "여행지", "description": "여행지를 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "worry_points", "label": "걱정 포인트", "description": "낮잠, 편식, 장거리 도보, 아이 의자 등 걱정 포인트를 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "현지 교통패스·지하철·이동 전략 프롬프트",
+    "description": "공항철도, 지하철, 버스, 패스권, 택시, 도보를 어떻게 섞어야 여행이 편한지 정리하는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "현지교통", "지하철", "교통패스"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외도시는 관광지보다 교통이 더 어려운 경우가 많습니다. 이 게시물은 공항 이동, 도시 내 패스권, 도보량, 택시 활용까지 함께 설계하는 데 적합합니다.\n\n먼저 교통 전략을 만들고,\n\n[[PROMPT:0]]\n\n후보 패스권이나 이동 수단이 있다면 상황별로 비교할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "현지 교통 전략 설계",
+        "template_body": "당신은 해외도시 교통 전략 도우미입니다.\n\n아래 조건을 바탕으로 현지 교통 이용 전략을 짜주세요.\n\n[도시]\n{{city}}\n\n[숙소 지역]\n{{hotel_area}}\n\n[주요 방문 예정 지역]\n{{main_areas}}\n\n[여행 기간]\n{{duration}}\n\n[동행자 및 이동 제약]\n{{movement_limit}}\n\n조건:\n- 공항 이동, 도시 내 이동, 심야 이동, 짐 있는 날 이동을 구분해서 정리할 것\n- 교통패스가 유리한지, 개별 결제가 유리한지, 택시를 섞는 것이 나은지 설명할 것\n- 초보 여행자 기준으로 실수하기 쉬운 포인트를 포함할 것\n- 마지막에 첫날 도착 직후와 마지막 날 출국 전 교통 운영 팁을 정리할 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "여행 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "hotel_area", "label": "숙소 지역", "description": "숙소 지역을 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "main_areas", "label": "주요 방문 지역", "description": "방문 예정 지역을 입력하세요", "type": "textarea", "sort_order": 2 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 3 },
+          { "key": "movement_limit", "label": "이동 제약", "description": "캐리어 큼, 아이 동반, 계단 약함, 늦은 밤 위험 회피 등 입력하세요", "type": "textarea", "sort_order": 4 }
+        ]
+      },
+      {
+        "title": "교통패스 후보 비교 프롬프트",
+        "template_body": "당신은 여행 교통패스 비교 도우미입니다.\n\n아래 교통패스 또는 이동 방식 후보를 보고 이번 여행에 맞게 비교해주세요.\n\n[도시]\n{{city}}\n\n[후보]\n{{pass_candidates}}\n\n[예상 동선]\n{{expected_route}}\n\n조건:\n- 무조건 싸다고 좋은 것이 아니라 사용 편의, 이동 횟수, 첫날/마지막 날 활용도, 관광 패턴을 고려할 것\n- 꼭 필요한 패스 / 있으면 좋은 패스 / 굳이 필요 없는 패스로 나눌 것\n- 마지막에 이번 여행에서 교통비를 아끼는 법보다 시간을 아끼는 법을 우선 설명할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "pass_candidates", "label": "후보", "description": "교통패스 또는 이동 방식 후보를 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "expected_route", "label": "예상 동선", "description": "주로 이동할 지역과 횟수를 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "현지 맛집·카페·식도락 여행 프롬프트",
+    "description": "유명 맛집만이 아니라 로컬 식당, 시장, 카페, 바를 동선에 맞게 묶어 식도락 여행 코스를 짜는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "맛집", "카페", "식도락"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행의 만족도는 먹는 경험이 크게 좌우합니다. 이 게시물은 단순한 맛집 리스트가 아니라 아침·점심·간식·저녁·야식의 흐름과 예약 난이도까지 고려한 식도락 코스를 만들기 위해 설계했습니다.\n\n먼저 식도락 코스를 설계하고,\n\n[[PROMPT:0]]\n\n맛집 후보가 많다면 우선순위 기준으로 다시 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "도시별 식도락 코스 설계",
+        "template_body": "당신은 해외 식도락 여행 플래너입니다.\n\n아래 조건에 맞춰 도시의 음식과 카페를 중심으로 여행 코스를 짜주세요.\n\n[도시]\n{{city}}\n\n[여행 기간]\n{{duration}}\n\n[동행자]\n{{companions}}\n\n[선호 음식]\n{{food_preference}}\n\n[피하고 싶은 것]\n{{avoid_conditions}}\n\n[원하는 분위기]\n{{mood}}\n\n조건:\n- 아침, 점심, 간식, 저녁, 카페 또는 바 흐름이 과하지 않게 이어지게 할 것\n- 관광지와 식사 장소가 따로 놀지 않게 동선에 맞춰 배치할 것\n- 유명한 곳만이 아니라 로컬 식당, 시장, 디저트, 감성 카페를 균형 있게 섞을 것\n- 예약 필요성, 웨이팅 가능성, 식사 시간대 팁을 함께 적을 것\n- 마지막에 꼭 먹어볼 것 5개와 비 오는 날 더 좋은 식도락 플랜을 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "duration", "label": "여행 기간", "description": "여행 기간을 입력하세요", "type": "text", "sort_order": 1 },
+          { "key": "companions", "label": "동행자", "description": "누구와 가는지 입력하세요", "type": "text", "sort_order": 2 },
+          { "key": "food_preference", "label": "선호 음식", "description": "면, 해산물, 디저트, 커피, 바 등 선호를 입력하세요", "type": "textarea", "sort_order": 3 },
+          { "key": "avoid_conditions", "label": "피할 조건", "description": "매운 음식, 웨이팅 긴 곳, 술 제외 등 입력하세요", "type": "textarea", "sort_order": 4 },
+          { "key": "mood", "label": "원하는 분위기", "description": "로컬, 감성카페, 힙한 바, 전통시장 등 입력하세요", "type": "textarea", "sort_order": 5 }
+        ]
+      },
+      {
+        "title": "맛집 후보 리스트 우선순위 정리",
+        "template_body": "당신은 해외여행 맛집 후보 정리 도우미입니다.\n\n아래 후보 리스트를 실제로 갈 가치가 높은 순서로 정리해주세요.\n\n[도시]\n{{city}}\n\n[후보 리스트]\n{{candidate_list}}\n\n[여행 스타일]\n{{travel_style}}\n\n조건:\n- 식사 시간, 동선, 분위기, 예약 난이도, 웨이팅 부담 기준으로 평가할 것\n- 반드시 갈 곳 / 상황 따라 갈 곳 / 굳이 안 가도 될 곳으로 나눌 것\n- 너무 유명하지만 여행 흐름을 망칠 수 있는 곳은 솔직하게 지적할 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "city", "label": "도시", "description": "도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "candidate_list", "label": "후보 리스트", "description": "찾아둔 맛집과 카페 후보를 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "travel_style", "label": "여행 스타일", "description": "맛집 위주, 관광 반반, 카페 위주 등 입력하세요", "type": "text", "sort_order": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "우천·돌발상황·플랜B 프롬프트",
+    "description": "비, 파업, 휴무, 체력 저하, 소매치기 우려, 길찾기 실패처럼 현지에서 생길 수 있는 변수에 대비한 대체 플랜 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "플랜B", "우천대비", "돌발상황"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행은 계획보다 변수가 많습니다. 이 게시물은 날씨 문제뿐 아니라 휴무, 예약 실패, 피로, 길찾기 문제처럼 현지에서 자주 생기는 상황의 백업 플랜을 준비하는 데 적합합니다.\n\n먼저 플랜B를 만들고,\n\n[[PROMPT:0]]\n\n불안한 상황에서 바로 볼 수 있는 긴급 행동 정리도 만들 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "여행 변수 대비 플랜B 설계",
+        "template_body": "당신은 해외여행 플랜B 설계 도우미입니다.\n\n아래 기존 여행 계획을 바탕으로 변수 발생 시 대체 플랜을 만들어주세요.\n\n[여행지]\n{{destination}}\n\n[기존 계획]\n{{original_plan}}\n\n[걱정되는 변수]\n{{risk_factors}}\n\n조건:\n- 비, 강풍, 폭염, 휴무, 예약 실패, 체력 저하, 늦은 출발, 교통 지연 같은 변수에 대응할 것\n- 완전히 다른 여행이 되지 않게 원래 분위기를 최대한 유지할 것\n- 무엇을 과감히 빼야 하는지, 무엇은 지켜야 하는지 구분할 것\n- 마지막에 일정이 꼬였을 때 우선순위 판단 기준 7개를 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "국가와 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "original_plan", "label": "기존 계획", "description": "기존 일정을 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "risk_factors", "label": "걱정되는 변수", "description": "비, 휴무, 체력, 치안 불안, 파업 등 입력하세요", "type": "textarea", "sort_order": 2 }
+        ]
+      },
+      {
+        "title": "긴급 상황 시 행동 정리",
+        "template_body": "해외여행 중 아래와 같은 상황이 생겼을 때 당황하지 않도록 행동 순서를 정리해주세요.\n\n[상황]\n{{emergency_case}}\n\n조건:\n- 여권 분실, 지갑 분실, 휴대폰 분실, 늦은 밤 길찾기 실패, 교통 파업, 몸이 아플 때, 예약 문제가 생겼을 때 같은 유형을 기준으로 정리할 것\n- 공포 조장이 아니라 침착한 순서 중심으로 적을 것\n- 당장 할 일 / 현지에서 확인할 것 / 귀국 전 정리할 것으로 나눌 것\n- 마지막에 여행 전에 미리 준비해두면 좋은 비상 대비 항목을 적을 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "emergency_case", "label": "상황", "description": "걱정되는 긴급 상황을 입력하세요", "type": "textarea", "sort_order": 0 }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "현지 안전·에티켓·사기 회피 프롬프트",
+    "description": "여행지의 기본 에티켓, 사진 촬영 예절, 팁 문화, 소매치기·관광객 대상 사기 회피 포인트를 정리하는 프롬프트입니다.",
+    "tags": ["해외여행", "여행", "안전", "에티켓", "사기예방"],
+    "visibility": "public",
+    "body_markdown": "## 소개\n\n해외여행 만족도는 명소보다도 현지에서 불편한 일을 덜 겪는 데 달려 있습니다. 이 게시물은 현지 에티켓과 기본 안전 감각을 빠르게 정리하는 데 적합합니다.\n\n먼저 여행지별 행동 가이드를 만들고,\n\n[[PROMPT:0]]\n\n관광객이 흔히 당하는 상황 위주로 회피 전략만 따로 정리할 수 있습니다.\n\n[[PROMPT:1]]",
+    "post_prompts": [
+      {
+        "title": "여행지별 안전·에티켓 요약",
+        "template_body": "당신은 해외여행 안전·에티켓 정리 도우미입니다.\n\n아래 여행지를 기준으로 여행자가 알아두면 좋은 기본 행동 가이드를 정리해주세요.\n\n[국가/도시]\n{{destination}}\n\n[여행 방식]\n{{travel_mode}}\n\n[동행자]\n{{companions}}\n\n조건:\n- 현지에서 무례하게 보일 수 있는 행동, 사진 촬영 주의, 팁 문화, 줄서기/대중교통 예절, 복장 유의점, 야간 이동 주의, 귀중품 관리 포인트를 포함할 것\n- 지나치게 무섭게 쓰지 말고 현실적으로 정리할 것\n- 초보 여행자가 바로 이해할 수 있게 짧고 명확하게 쓸 것\n- 마지막에 '이 도시에서 여행자가 쉽게 하는 실수 10개'를 적을 것",
+        "status": "complete",
+        "sort_order": 0,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "국가와 도시를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "travel_mode", "label": "여행 방식", "description": "자유여행, 출장, 쇼핑 위주, 야경 위주 등 입력하세요", "type": "textarea", "sort_order": 1 },
+          { "key": "companions", "label": "동행자", "description": "혼자, 연인, 가족, 친구 등 입력하세요", "type": "text", "sort_order": 2 }
+        ]
+      },
+      {
+        "title": "관광객 대상 사기·불편 상황 회피 포인트",
+        "template_body": "당신은 해외여행 리스크 회피 도우미입니다.\n\n아래 여행 조건을 기준으로 관광객이 자주 겪는 불편 상황과 회피 포인트를 정리해주세요.\n\n[여행지]\n{{destination}}\n\n[여행 스타일]\n{{travel_style}}\n\n조건:\n- 택시, 환전, 길안내, 사진 찍어주기, 호객, 티켓 판매, 소매치기, 레스토랑 추가요금, 바/클럽, 야시장, 기념품 쇼핑처럼 자주 생기는 상황을 포함할 것\n- 공포 조장이 아니라 '어떻게 구분하고 어떻게 대응하면 되는지' 중심으로 작성할 것\n- 마지막에 여행 중 계속 기억하면 좋은 짧은 원칙 12개를 적을 것",
+        "status": "complete",
+        "sort_order": 1,
+        "variables": [
+          { "key": "destination", "label": "여행지", "description": "여행지를 입력하세요", "type": "text", "sort_order": 0 },
+          { "key": "travel_style", "label": "여행 스타일", "description": "쇼핑 위주, 야시장 위주, 대중교통 위주 등 입력하세요", "type": "textarea", "sort_order": 1 }
+        ]
+      }
+    ]
+  }
+]

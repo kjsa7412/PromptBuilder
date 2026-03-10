@@ -91,8 +91,7 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
     <div className="space-y-5">
       {variables.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-white/80 uppercase tracking-wider">변수 입력</h3>
-          {variables.map((v) => (
+{variables.map((v) => (
             <div key={v.key} className="space-y-1.5">
               <label htmlFor={`var-${v.key}`} className="block text-sm font-medium text-gray-600 dark:text-white/70">
                 {v.label || v.key}
@@ -135,9 +134,7 @@ export default function PromptBuilder({ promptId, templateBody, variables, onGen
             </div>
           ))}
         </div>
-      ) : (
-        <p className="text-sm text-gray-400 dark:text-white/40 text-center py-4">이 프롬프트에는 변수가 없습니다.</p>
-      )}
+      ) : null}
 
       {variables.length > 0 && (
         <button

@@ -28,7 +28,11 @@ const DONE_DIR = path.join(__dirname, "done");
 
 function escapeSQL(str) {
   if (str === null || str === undefined) return "NULL";
-  return `'${String(str).replace(/'/g, "''")}'`;
+  const s = String(str)
+    .replace(/\\n/g, "\n")   // JSON \\n → 실제 개행
+    .replace(/\\t/g, "\t")   // JSON \\t → 실제 탭
+    .replace(/'/g, "''");    // SQL 단따옴표 이스케이프
+  return `'${s}'`;
 }
 
 function escapeArray(arr) {

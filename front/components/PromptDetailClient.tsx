@@ -216,8 +216,7 @@ export default function PromptDetailClient({ prompt }: { prompt: PromptDetail })
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">변수 입력 &amp; 생성</h2>
-                <p className="text-xs text-gray-500 dark:text-white/40 mt-0.5">{modalPostPrompt.title}</p>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">{modalPostPrompt.title}</h2>
               </div>
               <button
                 onClick={() => setShowVariableModal(false)}

@@ -21,6 +21,7 @@ interface PromptBlock {
 }
 
 type Block = TextBlock | PromptBlock;
+type EditorMode = 'simple' | 'advanced';
 
 interface Props {
   promptId?: string;
@@ -291,20 +292,103 @@ function TextBlockRenderer({
   );
 }
 
+// ─── SimpleModeEditor ─────────────────────────────────────────────────────────
+function SimpleModeEditor({
+  templateBody,
+  varDescriptions,
+  onTemplateChange,
+  onVarDescChange,
+}: {
+  templateBody: string;
+  varDescriptions: Record<string, string>;
+  onTemplateChange: (val: string) => void;
+  onVarDescChange: (key: string, val: string) => void;
+}) {
+  const varKeys = extractVarKeys(templateBody);
+
+  return (
+    <div className="space-y-5">
+      {/* Template body */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-600 dark:text-white/60">프롬프트 템플릿</label>
+          <span className="text-xs text-gray-400 dark:text-white/30">
+            <code className="bg-violet-500/10 text-violet-500 dark:text-violet-400 px-1.5 py-0.5 rounded font-mono">
+              {'{{변수명}}'}
+            </code>
+            {' '}으로 변수를 만들 수 있어요
+          </span>
+        </div>
+        <textarea
+          value={templateBody}
+          onChange={(e) => onTemplateChange(e.target.value)}
+          rows={12}
+          placeholder={`당신은 {{role}} 전문가입니다.\n\n{{topic}}에 대해 {{audience}}가 이해하기 쉽게 설명해주세요.\n\n조건:\n- 핵심만 간결하게\n- 예시 2개 이상 포함`}
+          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-mono text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40 transition-all resize-y"
+        />
+      </div>
+
+      {/* Auto-detected variables */}
+      {varKeys.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
+            <span className="text-xs text-gray-400 dark:text-white/30 px-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
+              감지된 변수 {varKeys.length}개
+            </span>
+            <div className="h-px flex-1 bg-gray-200 dark:bg-white/10" />
+          </div>
+          <div className="grid gap-2">
+            {varKeys.map((k) => (
+              <div
+                key={k}
+                className="flex items-center gap-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 transition-all focus-within:border-violet-400/50 focus-within:ring-1 focus-within:ring-violet-500/20"
+              >
+                <code className="text-xs text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-1 rounded font-mono flex-shrink-0 whitespace-nowrap">
+                  {'{{' + k + '}}'}
+                </code>
+                <input
+                  type="text"
+                  value={varDescriptions[k] || ''}
+                  onChange={(e) => onVarDescChange(k, e.target.value)}
+                  placeholder="사용자에게 보여줄 설명 (선택사항)"
+                  className="flex-1 bg-transparent text-sm text-gray-700 dark:text-white/70 placeholder-gray-300 dark:placeholder-white/30 outline-none min-w-0"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function PromptEditorPage({ promptId, token }: Props) {
   const router = useRouter();
   const isEdit = !!promptId;
 
+  // ─── Shared state ────────────────────────────────────────────────────────────
+  const [mode, setMode] = useState<EditorMode>('simple');
   const [postTitle, setPostTitle] = useState('');
   const [postDesc, setPostDesc] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [visibility, setVisibility] = useState<'private' | 'public'>('public');
-  const [blocks, setBlocks] = useState<Block[]>([{ id: uid(), type: 'text', content: '' }]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState<string | null>(null);
+  const [modeError, setModeError] = useState<string | null>(null);
+
+  // ─── Simple mode state ───────────────────────────────────────────────────────
+  const [simpleTemplateBody, setSimpleTemplateBody] = useState('');
+  const [simpleVarDescriptions, setSimpleVarDescriptions] = useState<Record<string, string>>({});
+  // Preserves existing server ID for edit mode (needed for DELETE on save)
+  const [simplePostPromptId, setSimplePostPromptId] = useState<string | undefined>(undefined);
+
+  // ─── Advanced mode state ─────────────────────────────────────────────────────
+  const [blocks, setBlocks] = useState<Block[]>([{ id: uid(), type: 'text', content: '' }]);
   const [slashState, setSlashState] = useState<SlashState | null>(null);
   const [activeModalId, setActiveModalId] = useState<string | null>(null);
 
@@ -387,7 +471,22 @@ export default function PromptEditorPage({ promptId, token }: Props) {
           reconstructedBlocks.push({ id: uid(), type: 'text', content: '' });
         }
 
-        setBlocks(reconstructedBlocks);
+        // Auto-detect mode: simple if exactly 1 prompt block and no text content
+        const promptBlocksOnly = reconstructedBlocks.filter((b) => b.type === 'prompt') as PromptBlock[];
+        const textBlocksWithContent = reconstructedBlocks.filter(
+          (b) => b.type === 'text' && (b as TextBlock).content.trim()
+        );
+
+        if (promptBlocksOnly.length === 1 && textBlocksWithContent.length === 0) {
+          const pb = promptBlocksOnly[0];
+          setSimpleTemplateBody(pb.templateBody);
+          setSimpleVarDescriptions(pb.variableDescriptions);
+          setSimplePostPromptId(pb.postPromptId);
+          setMode('simple');
+        } else {
+          setBlocks(reconstructedBlocks);
+          setMode('advanced');
+        }
       } catch {
         setError('오류가 발생했습니다.');
       }
@@ -397,6 +496,46 @@ export default function PromptEditorPage({ promptId, token }: Props) {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promptId]);
+
+  // ─── Mode switch ─────────────────────────────────────────────────────────────
+  const canSwitchToSimple = (() => {
+    const promptBlocks = blocks.filter((b) => b.type === 'prompt');
+    const textBlocksWithContent = blocks.filter(
+      (b) => b.type === 'text' && (b as TextBlock).content.trim()
+    );
+    return promptBlocks.length <= 1 && textBlocksWithContent.length === 0;
+  })();
+
+  const switchToAdvanced = () => {
+    // Carry simple state into a single PromptBlock
+    const newBlock: PromptBlock = {
+      id: uid(),
+      type: 'prompt',
+      postPromptId: simplePostPromptId,
+      title: postTitle || '프롬프트',
+      templateBody: simpleTemplateBody,
+      status: 'complete',
+      variableDescriptions: simpleVarDescriptions,
+    };
+    setBlocks([newBlock]);
+    setMode('advanced');
+    setModeError(null);
+  };
+
+  const switchToSimple = () => {
+    if (!canSwitchToSimple) {
+      setModeError('간단 모드는 프롬프트 블록이 1개이고 텍스트 블록 내용이 없을 때만 전환할 수 있습니다.');
+      return;
+    }
+    const pb = blocks.find((b) => b.type === 'prompt') as PromptBlock | undefined;
+    if (pb) {
+      setSimpleTemplateBody(pb.templateBody);
+      setSimpleVarDescriptions(pb.variableDescriptions);
+      setSimplePostPromptId(pb.postPromptId);
+    }
+    setMode('simple');
+    setModeError(null);
+  };
 
   // ─── Block operations ───────────────────────────────────────────────────────
   const updateBlock = useCallback((id: string, updates: Partial<Block>) => {
@@ -426,14 +565,13 @@ export default function PromptEditorPage({ promptId, token }: Props) {
   };
 
   // ─── Slash command handlers ─────────────────────────────────────────────────
-  // Inserts cmd.insert at the '/' position, removes the /query typed so far
   const applySlashCommand = useCallback(
     (blockId: string, cmd: SlashCmd) => {
       const block = blocks.find((b) => b.id === blockId) as TextBlock | undefined;
       if (!block || !slashState) { setSlashState(null); return; }
 
       const slashPos = slashState.slashPos;
-      const endPos = slashPos + 1 + slashState.query.length; // after /query
+      const endPos = slashPos + 1 + slashState.query.length;
       const newContent = block.content.slice(0, slashPos) + cmd.insert + block.content.slice(endPos);
       const newCursorPos = slashPos + cmd.insert.length;
 
@@ -499,8 +637,7 @@ export default function PromptEditorPage({ promptId, token }: Props) {
     }
   };
 
-  // ─── Assemble bodyMarkdown ──────────────────────────────────────────────────
-  // Text block content is already markdown — use it directly
+  // ─── Assemble bodyMarkdown (advanced mode only) ──────────────────────────────
   const assembleBodyMarkdown = () => {
     const parts: string[] = [];
     let promptIndex = 0;
@@ -530,16 +667,28 @@ export default function PromptEditorPage({ promptId, token }: Props) {
         : '');
     if (!effectiveTitle) { setError('제목을 입력하세요'); return; }
 
-    if (saveVisibility !== 'draft') {
-      const promptBlocks = blocks.filter((b) => b.type === 'prompt') as PromptBlock[];
-      if (promptBlocks.length > 0) {
-        const incomplete = promptBlocks.filter((pb) => pb.status !== 'complete');
-        if (incomplete.length > 0) {
-          setError(
-            `모든 프롬프트 블록이 '완성' 상태여야 발행할 수 있습니다. 현재 미완성 블록: ${incomplete.length}개`
-          );
-          return;
-        }
+    // Determine effective prompt blocks based on mode
+    const effectivePromptBlocks: PromptBlock[] =
+      mode === 'simple'
+        ? [{
+            id: uid(),
+            type: 'prompt',
+            postPromptId: simplePostPromptId,
+            title: effectiveTitle,
+            templateBody: simpleTemplateBody,
+            status: 'complete',
+            variableDescriptions: simpleVarDescriptions,
+          }]
+        : (blocks.filter((b) => b.type === 'prompt') as PromptBlock[]);
+
+    // Validate advanced mode: all blocks must be complete before publish
+    if (saveVisibility !== 'draft' && mode === 'advanced') {
+      const incomplete = effectivePromptBlocks.filter((pb) => pb.status !== 'complete');
+      if (incomplete.length > 0) {
+        setError(
+          `모든 프롬프트 블록이 '완성' 상태여야 발행할 수 있습니다. 현재 미완성 블록: ${incomplete.length}개`
+        );
+        return;
       }
     }
 
@@ -547,9 +696,8 @@ export default function PromptEditorPage({ promptId, token }: Props) {
     setError(null);
 
     try {
-      const bodyMarkdown = assembleBodyMarkdown();
-      const promptBlocks = blocks.filter((b) => b.type === 'prompt') as PromptBlock[];
-      const firstPrompt = promptBlocks[0];
+      const bodyMarkdown = mode === 'simple' ? '[[PROMPT:0]]' : assembleBodyMarkdown();
+      const firstPrompt = effectivePromptBlocks[0];
 
       if (isEdit && promptId) {
         const res = await fetch(`${API_BASE}/api/me/prompts/${promptId}`, {
@@ -566,7 +714,8 @@ export default function PromptEditorPage({ promptId, token }: Props) {
         });
         if (!res.ok) throw new Error('저장 실패');
 
-        const existingIds = (blocks.filter((b) => b.type === 'prompt') as PromptBlock[])
+        // Delete all existing post-prompts then recreate
+        const existingIds = effectivePromptBlocks
           .map((pb) => pb.postPromptId)
           .filter(Boolean) as string[];
 
@@ -579,9 +728,9 @@ export default function PromptEditorPage({ promptId, token }: Props) {
           )
         );
 
-        if (promptBlocks.length > 0) {
+        if (effectivePromptBlocks.length > 0) {
           await Promise.allSettled(
-            promptBlocks.map((pb, i) =>
+            effectivePromptBlocks.map((pb, i) =>
               fetch(`${API_BASE}/api/me/prompts/${promptId}/post-prompts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -618,9 +767,9 @@ export default function PromptEditorPage({ promptId, token }: Props) {
         const created = await res.json();
         const newId = created.data?.id;
 
-        if (newId && promptBlocks.length > 0) {
+        if (newId && effectivePromptBlocks.length > 0) {
           await Promise.allSettled(
-            promptBlocks.map((pb, i) =>
+            effectivePromptBlocks.map((pb, i) =>
               fetch(`${API_BASE}/api/me/prompts/${newId}/post-prompts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -675,6 +824,34 @@ export default function PromptEditorPage({ promptId, token }: Props) {
           <h1 className="text-base font-semibold text-gray-900 dark:text-white flex-shrink-0">
             {isEdit ? '프롬프트 수정' : '새 프롬프트 작성'}
           </h1>
+
+          {/* Mode toggle */}
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/10 rounded-lg p-0.5 text-xs flex-shrink-0">
+            <button
+              onClick={mode === 'advanced' ? switchToSimple : undefined}
+              title={mode === 'advanced' && !canSwitchToSimple ? '블록이 여러 개일 때는 전환할 수 없습니다' : undefined}
+              className={`px-3 py-1.5 rounded-md transition-all ${
+                mode === 'simple'
+                  ? 'bg-white dark:bg-white/20 text-gray-900 dark:text-white shadow-sm font-medium'
+                  : canSwitchToSimple
+                    ? 'text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/70 cursor-pointer'
+                    : 'text-gray-300 dark:text-white/20 cursor-not-allowed'
+              }`}
+            >
+              간단히
+            </button>
+            <button
+              onClick={mode === 'simple' ? switchToAdvanced : undefined}
+              className={`px-3 py-1.5 rounded-md transition-all ${
+                mode === 'advanced'
+                  ? 'bg-white dark:bg-white/20 text-gray-900 dark:text-white shadow-sm font-medium'
+                  : 'text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white/70 cursor-pointer'
+              }`}
+            >
+              자세히
+            </button>
+          </div>
+
           <div className="flex items-center gap-2 ml-auto">
             <select
               value={visibility}
@@ -720,9 +897,24 @@ export default function PromptEditorPage({ promptId, token }: Props) {
         </div>
       )}
 
+      {/* Mode error banner */}
+      {modeError && (
+        <div className="max-w-4xl mx-auto px-6 pt-4">
+          <div className="flex items-start gap-3 text-sm text-amber-600 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-3">
+            <span className="flex-1">{modeError}</span>
+            <button
+              onClick={() => setModeError(null)}
+              className="ml-auto flex-shrink-0 text-amber-400 hover:text-amber-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-5">
-        {/* Post meta */}
+        {/* Post meta — shared across both modes */}
         <div className="space-y-3">
           <input
             type="text"
@@ -731,13 +923,16 @@ export default function PromptEditorPage({ promptId, token }: Props) {
             placeholder="제목을 입력하세요"
             className="w-full text-3xl font-bold bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-white/20"
           />
-          <input
-            type="text"
-            value={postDesc}
-            onChange={(e) => setPostDesc(e.target.value)}
-            placeholder="설명 (선택사항)"
-            className="w-full text-base bg-transparent border-none outline-none text-gray-500 dark:text-white/50 placeholder-gray-300 dark:placeholder-white/20"
-          />
+          {/* Description only shown in advanced mode */}
+          {mode === 'advanced' && (
+            <input
+              type="text"
+              value={postDesc}
+              onChange={(e) => setPostDesc(e.target.value)}
+              placeholder="설명 (선택사항)"
+              className="w-full text-base bg-transparent border-none outline-none text-gray-500 dark:text-white/50 placeholder-gray-300 dark:placeholder-white/20"
+            />
+          )}
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5 min-h-[32px] items-center">
             {tags.map((tag) => (
@@ -779,94 +974,111 @@ export default function PromptEditorPage({ promptId, token }: Props) {
           <div className="border-b border-gray-200 dark:border-white/10" />
         </div>
 
-        {/* Content blocks */}
-        <div className="space-y-3">
-          {blocks.map((block) => {
-            if (block.type === 'text') {
-              const tb = block as TextBlock;
-              const isSlashActive = slashState?.blockId === tb.id;
-              return (
-                <TextBlockRenderer
-                  key={tb.id}
-                  block={tb}
-                  slashActive={isSlashActive}
-                  slashState={slashState}
-                  onSlashSelect={(cmd) => applySlashCommand(tb.id, cmd)}
-                  textareaRef={(el) => { textareaRefs.current[tb.id] = el; }}
-                  onChangeText={(val, cursor) => handleInputChange(tb.id, val, cursor)}
-                  onKeyDown={(e) => handleInputKeyDown(tb.id, e)}
-                  onBlur={() => setTimeout(() => setSlashState(null), 150)}
-                  onRemove={() => removeBlock(tb.id)}
-                  showRemove={blocks.length > 1}
-                />
-              );
+        {/* ── Simple mode content ── */}
+        {mode === 'simple' && (
+          <SimpleModeEditor
+            templateBody={simpleTemplateBody}
+            varDescriptions={simpleVarDescriptions}
+            onTemplateChange={setSimpleTemplateBody}
+            onVarDescChange={(k, v) =>
+              setSimpleVarDescriptions((prev) => ({ ...prev, [k]: v }))
             }
+          />
+        )}
 
-            const pb = block as PromptBlock;
-            const varKeys = extractVarKeys(pb.templateBody);
-            return (
-              <div
-                key={pb.id}
-                onClick={() => setActiveModalId(pb.id)}
-                className="group relative rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-violet-400/50 bg-gray-50 dark:bg-white/5 cursor-pointer transition-all"
-              >
-                <div className="p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">
-                      PROMPT
-                    </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-white/80">
-                      {pb.title || '제목 없음'}
-                    </span>
-                    <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[pb.status]}`}>
-                      {STATUS_LABELS[pb.status]}
-                    </span>
-                  </div>
-                  {pb.templateBody && (
-                    <p className="text-xs text-gray-400 dark:text-white/30 font-mono truncate pl-1">
-                      {pb.templateBody.slice(0, 80)}{pb.templateBody.length > 80 ? '...' : ''}
-                    </p>
-                  )}
-                  {varKeys.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {varKeys.map((k) => (
-                        <span key={k} className="text-xs bg-violet-500/20 text-violet-500 dark:text-violet-400 px-1.5 py-0.5 rounded font-mono">
-                          {'{{' + k + '}}'}
+        {/* ── Advanced mode content ── */}
+        {mode === 'advanced' && (
+          <>
+            {/* Content blocks */}
+            <div className="space-y-3">
+              {blocks.map((block) => {
+                if (block.type === 'text') {
+                  const tb = block as TextBlock;
+                  const isSlashActive = slashState?.blockId === tb.id;
+                  return (
+                    <TextBlockRenderer
+                      key={tb.id}
+                      block={tb}
+                      slashActive={isSlashActive}
+                      slashState={slashState}
+                      onSlashSelect={(cmd) => applySlashCommand(tb.id, cmd)}
+                      textareaRef={(el) => { textareaRefs.current[tb.id] = el; }}
+                      onChangeText={(val, cursor) => handleInputChange(tb.id, val, cursor)}
+                      onKeyDown={(e) => handleInputKeyDown(tb.id, e)}
+                      onBlur={() => setTimeout(() => setSlashState(null), 150)}
+                      onRemove={() => removeBlock(tb.id)}
+                      showRemove={blocks.length > 1}
+                    />
+                  );
+                }
+
+                const pb = block as PromptBlock;
+                const varKeys = extractVarKeys(pb.templateBody);
+                return (
+                  <div
+                    key={pb.id}
+                    onClick={() => setActiveModalId(pb.id)}
+                    className="group relative rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-violet-400/50 bg-gray-50 dark:bg-white/5 cursor-pointer transition-all"
+                  >
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-violet-500 dark:text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">
+                          PROMPT
                         </span>
-                      ))}
+                        <span className="text-sm font-medium text-gray-700 dark:text-white/80">
+                          {pb.title || '제목 없음'}
+                        </span>
+                        <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[pb.status]}`}>
+                          {STATUS_LABELS[pb.status]}
+                        </span>
+                      </div>
+                      {pb.templateBody && (
+                        <p className="text-xs text-gray-400 dark:text-white/30 font-mono truncate pl-1">
+                          {pb.templateBody.slice(0, 80)}{pb.templateBody.length > 80 ? '...' : ''}
+                        </p>
+                      )}
+                      {varKeys.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {varKeys.map((k) => (
+                            <span key={k} className="text-xs bg-violet-500/20 text-violet-500 dark:text-violet-400 px-1.5 py-0.5 rounded font-mono">
+                              {'{{' + k + '}}'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400 dark:text-white/30 pt-1">클릭하여 편집</p>
                     </div>
-                  )}
-                  <p className="text-xs text-gray-400 dark:text-white/30 pt-1">클릭하여 편집</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); removeBlock(pb.id); }}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-full bg-red-500/20 text-red-500 hover:bg-red-500/30 text-xs transition-all"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeBlock(pb.id); }}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-full bg-red-500/20 text-red-500 hover:bg-red-500/30 text-xs transition-all"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
 
-        {/* Add block buttons */}
-        <div className="flex gap-3">
-          <button
-            onClick={addTextBlock}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 dark:text-white/40 border border-dashed border-gray-300 dark:border-white/20 rounded-xl hover:border-gray-400 dark:hover:border-white/40 hover:text-gray-700 dark:hover:text-white/60 transition-all"
-          >
-            + 텍스트 블록
-          </button>
-          <button
-            onClick={addPromptBlock}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-violet-500 dark:text-violet-400 border border-dashed border-violet-400/50 rounded-xl hover:border-violet-500 hover:bg-violet-500/5 transition-all"
-          >
-            + 프롬프트 추가
-          </button>
-        </div>
+            {/* Add block buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={addTextBlock}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-500 dark:text-white/40 border border-dashed border-gray-300 dark:border-white/20 rounded-xl hover:border-gray-400 dark:hover:border-white/40 hover:text-gray-700 dark:hover:text-white/60 transition-all"
+              >
+                + 텍스트 블록
+              </button>
+              <button
+                onClick={addPromptBlock}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-violet-500 dark:text-violet-400 border border-dashed border-violet-400/50 rounded-xl hover:border-violet-500 hover:bg-violet-500/5 transition-all"
+              >
+                + 프롬프트 추가
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Prompt block modal */}
+      {/* Prompt block modal (advanced mode only) */}
       {activeModalBlock && (
         <PromptBlockModal
           block={activeModalBlock}
