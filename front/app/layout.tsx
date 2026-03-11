@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { siteConfig } from '@/lib/site';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -81,6 +82,7 @@ export default function RootLayout({
           </main>
           <MobileBottomNav />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
